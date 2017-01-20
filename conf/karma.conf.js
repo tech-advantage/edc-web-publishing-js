@@ -14,6 +14,8 @@ module.exports = function (config) {
       'karma-typescript'
     ],
     files: [
+      conf.path.src('./lib/axios/dist/axios.js'),
+      conf.path.src('./lib/es6-promise/dist/es6-promise.js'),
       conf.path.src('**/*.ts')
     ],
     preprocessors: {
@@ -21,9 +23,11 @@ module.exports = function (config) {
         'karma-typescript'
       ]
     },
+    reporters: ['kjhtml'],
     plugins: [
-        require('karma-jasmine'),
-        require('karma-typescript'),
+      require('karma-jasmine'),
+      require('karma-jasmine-html-reporter'),
+      require('karma-typescript'),
       require('karma-firefox-launcher')
     ]
   };

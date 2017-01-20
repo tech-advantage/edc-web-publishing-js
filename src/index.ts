@@ -1,3 +1,6 @@
-import { Greeter } from './greeter';
+import { EdcClient } from './edc-client';
 
-export { Greeter };
+declare let window: any;
+window.EdcClient = EdcClient;
+
+export { EdcClient };
