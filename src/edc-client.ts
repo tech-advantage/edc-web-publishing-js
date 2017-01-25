@@ -1,19 +1,18 @@
 import { Promise } from 'es6-promise';
 import axios from 'axios';
 
-declare let window: any;
-
 export class EdcClient {
   context: any;
+  ready: Promise<any>;
 
-  constructor(baseURL?: string) {
-    axios.create({baseURL});
+  constructor(public baseURL?: string) {
+    axios.create();
 
-    this.getContext();
+    this.ready = this.getContext();
   }
 
   getContext(): Promise<any> {
-    return axios.get('/context.json').then(res => this.context = res.data);
+    return axios.get(`${this.baseURL}/context.json`).then(res => this.context = res.data);
   }
 
   getHelper(primaryKey: string, subKey: string, lang: string = 'en') {

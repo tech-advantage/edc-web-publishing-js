@@ -1,4 +1,4 @@
-import { EdcClient } from './';
+import { EdcClient } from './edc-client';
 import axios from 'axios';
 import { Promise } from 'es6-promise';
 
@@ -11,9 +11,10 @@ describe('EDC client', () => {
       spyOn(axios, 'get').and.returnValue(Promise.resolve({}));
 
       edcClient = new EdcClient('http://base.url:8080/help');
-
-      expect(axios.create).toHaveBeenCalledWith({ baseURL: 'http://base.url:8080/help'});
-      expect(axios.get).toHaveBeenCalledWith('/context.json');
+      edcClient.ready.then(() => {
+        expect(axios.create).toHaveBeenCalledWith({ baseURL: 'http://base.url:8080/help'});
+        expect(axios.get).toHaveBeenCalledWith('http://base.url:8080/help/context.json');
+      });
     });
   });
 
@@ -27,7 +28,7 @@ describe('EDC client', () => {
 
       edcClient.getContext();
 
-      expect(axios.get).toHaveBeenCalledWith('/context.json');
+      expect(axios.get).toHaveBeenCalledWith('http://base.url:8080/help/context.json');
     });
 
     it('should get helper', () => {
