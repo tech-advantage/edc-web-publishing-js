@@ -1,7 +1,7 @@
 import { Promise } from 'es6-promise';
 import axios from 'axios';
-import { Article } from './entities/article';
 import { Helper } from './entities/helper';
+import { Loadable } from './entities/loadable';
 
 export class EdcClient {
   context: any;
@@ -23,17 +23,15 @@ export class EdcClient {
       return Promise.resolve(undefined);
     }
 
-    return Promise.all(helper.articles.map(article => {
-        this.getArticle(article);
-      }))
+    return Promise.all([this.getContent(helper), ...helper.articles.map(article => this.getContent(article))])
       .then(() => helper);
   }
 
-  getArticle(article: Article): Promise<Article> {
-    return axios.get(this.baseURL + article.url)
+  getContent(item: Loadable): Promise<Loadable> {
+    return axios.get(`${this.baseURL}/${item.url}`)
       .then(res => {
-        article.content = res.data;
-        return article;
+        item.content = res.data;
+        return item;
       });
   }
 

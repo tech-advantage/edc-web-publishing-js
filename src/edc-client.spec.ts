@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Promise } from 'es6-promise';
 
 describe('EDC client', () => {
-  let edcClient;
+  let edcClient: EdcClient;
 
   describe('init', () => {
     it('should init edc client', () => {
@@ -32,13 +32,13 @@ describe('EDC client', () => {
               'articles': [
                 {
                   'label': 'foo',
-                  'url': '/bar'
+                  'url': 'bar'
                 }
               ]
             }
           }
         }
-      }
+      };
 
       edcClient.context = context;
     });
@@ -57,7 +57,7 @@ describe('EDC client', () => {
         'articles': [
           {
             'label': 'foo',
-            'url': '/bar'
+            'url': 'bar'
           }
         ]
       });
@@ -68,21 +68,21 @@ describe('EDC client', () => {
       let article = edcClient.context.foo.bar.en.articles[0];
 
 
-      edcClient.getArticle(article).then(() => {
+      edcClient.getContent(article).then(() => {
         expect(axios.get).toHaveBeenCalledWith('http://base.url:8080/help/bar');
         expect(article.content).toBe('baz');
       });
     });
 
     it('should get helper', () => {
-      spyOn(edcClient, 'getArticle').and.returnValue(Promise.resolve('baz'));
+      spyOn(edcClient, 'getContent').and.returnValue(Promise.resolve('baz'));
 
       edcClient.getHelper('foo', 'bar').then(helper => {
-        expect(edcClient.getArticle).toHaveBeenCalledWith(helper.articles[0]);
+        expect(edcClient.getContent).toHaveBeenCalledWith(helper.articles[0]);
         expect(helper.articles.length).toBe(1);
         expect(helper.articles[0]).toEqual({
           label: 'foo',
-          url: '/bar',
+          url: 'bar',
           content: 'baz'
         });
       });
