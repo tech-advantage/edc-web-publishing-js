@@ -6,8 +6,14 @@ import { Loadable } from './entities/loadable';
 export class EdcClient {
   context: any;
   ready: Promise<any>;
+  baseURL: string;
 
-  constructor(public baseURL?: string) {
+  constructor(baseURL?: string) {
+    this.init(baseURL);
+  }
+
+  init(baseURL: string) {
+    this.baseURL = baseURL;
     axios.create();
 
     this.ready = this.getContext();
