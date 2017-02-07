@@ -57,7 +57,7 @@ gulp.task('build', function (cb) {
 });
 
 gulp.task('test', gulp.series('karma:single-run'));
-gulp.task('test:auto', gulp.series('karma:auto-run'));
+gulp.task('test-auto', gulp.series('karma:auto-run'));
 
 gulp.task('watch', function () {
   gulp.watch(tsFilesGlob, ['build']);

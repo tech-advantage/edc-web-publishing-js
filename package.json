@@ -17,14 +17,16 @@
     "build": "gulp build",
     "lint": "gulp lint",
     "test": "gulp test",
-    "test-auto": "gulp test:auto"
+    "test-auto": "gulp test-auto"
   },
   "dependencies": {
     "axios": "^0.15.3",
-    "es6-promise": "^4.0.5"
+    "es6-promise": "^4.0.5",
+    "lodash": "^4.17.4"
   },
   "devDependencies": {
     "@types/jasmine": "^2.5.38",
+    "@types/lodash": "4.14.39",
     "@types/node": "6.0.31",
     "del": "^2.2.1",
     "dotbin": "^1.0",

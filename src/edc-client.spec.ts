@@ -1,19 +1,25 @@
 import { EdcClient } from './edc-client';
 import axios from 'axios';
 import { Promise } from 'es6-promise';
+import { Documentation } from './entities/documentation';
+import { mock, async } from './utils/test-utils';
+import { Toc } from './entities/toc';
+import { Utils } from './utils/utils';
 
 describe('EDC client', () => {
   let edcClient: EdcClient;
+  let toc;
 
   describe('init', () => {
     it('should init edc client', () => {
       spyOn(axios, 'create');
       spyOn(axios, 'get').and.returnValue(Promise.resolve({}));
-
       edcClient = new EdcClient('http://base.url:8080/help');
-      edcClient.ready.then(() => {
+
+      Promise.all([edcClient.contextReady, edcClient.tocReady]).then(() => {
         expect(axios.create).toHaveBeenCalledWith({ baseURL: 'http://base.url:8080/help'});
         expect(axios.get).toHaveBeenCalledWith('http://base.url:8080/help/context.json');
+        expect(axios.get).toHaveBeenCalledWith('http://base.url:8080/help/toc.json');
       });
     });
   });
@@ -22,7 +28,9 @@ describe('EDC client', () => {
     let context;
 
     beforeEach(() => {
-      edcClient = new EdcClient('http://base.url:8080/help');
+      spyOn(EdcClient.prototype, 'init');
+      edcClient = new EdcClient();
+      edcClient.baseURL = 'http://base.url:8080/help';
 
       context = {
         'foo' : {
@@ -40,7 +48,18 @@ describe('EDC client', () => {
         }
       };
 
+     toc = {
+       label: 'EDC IDE Eclipse',
+       informationMaps: [
+         {
+           id: '2',
+           file: 'toc-2.json'
+         }
+       ]
+     };
+
       edcClient.context = context;
+      edcClient.toc = toc;
     });
 
     it('should get context', () => {
@@ -49,6 +68,43 @@ describe('EDC client', () => {
       edcClient.getContext();
 
       expect(axios.get).toHaveBeenCalledWith('http://base.url:8080/help/context.json');
+    });
+
+    describe('should test getToc()', () => {
+
+      let infoMap;
+      let promises;
+      let indexTree;
+
+      beforeEach(() => {
+        infoMap = { id: 2, en: { id: 5 } };
+        // promises to return from the axios.get callFakes
+        promises = {
+          'http://base.url:8080/help/toc.json': Promise.resolve({ data: toc }),
+          'http://base.url:8080/help/toc-2.json': Promise.resolve({ data: infoMap })
+        };
+
+        // indexTree generated from toc's infomap
+        indexTree = {
+          5: 'informationMaps[0].children[0]'
+        };
+        spyOn(axios, 'get').and.callFake((arg: any): Promise<any> => promises[arg]);
+        spyOn(Utils, 'indexTree').and.returnValue(indexTree);
+      });
+
+      it('should get table of content', async(() => {
+
+        // return - for the async function
+        return edcClient.getToc().then((res) => {
+          expect(axios.get).toHaveBeenCalledWith('http://base.url:8080/help/toc.json');
+
+          // it's a little bit dirty but it works
+          // checking the mapping of the informationMaps
+          expect(res.informationMaps[0].children).toEqual([{ id: 5 }]);
+          expect(edcClient.toc.index).toEqual(indexTree);
+          expect(axios.get).toHaveBeenCalledWith('http://base.url:8080/help/toc-2.json');
+        });
+      }));
     });
 
     it('should get key', () => {
@@ -91,6 +147,46 @@ describe('EDC client', () => {
     it('should get undefined helper', () => {
       edcClient.getHelper('foo', 'foo').then(helper => {
         expect(helper).toBe(undefined);
+      });
+    });
+
+    it('should get the documentation', () => {
+      spyOn(edcClient, 'getContent').and.returnValue(Promise.resolve('baz'));
+
+      let tree: Documentation[] = [
+        mock(Documentation, {
+          id: 1,
+          children: [
+            { id: 10 },
+            {
+              id: 11,
+              children: [
+                {
+                  id: 110,
+                  url: 'foo/bar',
+                  children: []
+                }
+              ]
+            }
+          ]
+        })
+      ];
+      edcClient.toc = mock(Toc, {
+        informationMaps: tree,
+        index: {
+          10: 'informationMaps[0].children[0]',
+          11: 'informationMaps[0].children[1]',
+          110: 'informationMaps[0].children[1].children[0]'
+        }
+      });
+
+      edcClient.getDocumentation(110).then(doc => {
+        expect(doc).toEqual({
+          id: 110,
+          children: []
+        });
+
+        expect(edcClient.getContent).toHaveBeenCalledWith('foo/bar');
       });
     });
   });
