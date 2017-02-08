@@ -52,19 +52,23 @@ export class EdcClient {
   }
 
   getHelper(key: string, subKey: string, lang: string = 'en'): Promise<Helper> {
-    let helper = this.getKey(key, subKey, lang);
-    if (!helper) {
-      return Promise.resolve(undefined);
-    }
-
-    return Promise.all([this.getContent(helper), ...helper.articles.map(article => this.getContent(article))])
+    let helper: Helper;
+    return this.contextReady
+      .then(() => {
+        helper = this.getKey(key, subKey, lang);
+        if (helper) {
+          return Promise.all([ this.getContent(helper), ...helper.articles.map(article => this.getContent(article)) ]);
+        }
+      })
       .then(() => helper);
   }
 
   getDocumentation(id: number): Promise<Documentation> {
-    let path = this.toc.index[id];
-    let doc = get<Documentation>(this.toc, path);
-    return this.getContent(doc);
+    return this.tocReady.then(() => {
+      let path = this.toc.index[id];
+      let doc = get<Documentation>(this.toc, path);
+      return this.getContent(doc);
+    });
   }
 
   getContent(item: Loadable): Promise<Loadable> {
@@ -76,6 +80,6 @@ export class EdcClient {
   }
 
   getKey(key: string, subKey: string, lang: string): Helper {
-      return get<Helper>(this.context, `${key}.${subKey}.${lang}`);
+      return get<Helper>(this.context, `['${key}']['${subKey}']['${lang}']`);
   }
 }

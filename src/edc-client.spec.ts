@@ -132,6 +132,7 @@ describe('EDC client', () => {
 
     it('should get helper', () => {
       spyOn(edcClient, 'getContent').and.returnValue(Promise.resolve('baz'));
+      edcClient.contextReady = Promise.resolve();
 
       edcClient.getHelper('foo', 'bar').then(helper => {
         expect(edcClient.getContent).toHaveBeenCalledWith(helper.articles[0]);
@@ -145,6 +146,7 @@ describe('EDC client', () => {
     });
 
     it('should get undefined helper', () => {
+      edcClient.contextReady = Promise.resolve();
       edcClient.getHelper('foo', 'foo').then(helper => {
         expect(helper).toBe(undefined);
       });
@@ -179,6 +181,8 @@ describe('EDC client', () => {
           110: 'informationMaps[0].children[1].children[0]'
         }
       });
+      edcClient.tocReady = Promise.resolve(edcClient.toc);
+
 
       edcClient.getDocumentation(110).then(doc => {
         expect(doc).toEqual({

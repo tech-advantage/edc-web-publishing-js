@@ -1,6 +1,5 @@
-import { reduce } from 'lodash';
+import { reduce, assign } from 'lodash';
 import { Documentation } from '../entities/documentation';
-import assign = require('lodash/assign');
 import { Indexable } from '../entities/indexable';
 
 export class Utils {
