@@ -1,4 +1,5 @@
-This plugin is meant to be used with edc
+# This plugin is meant to be used with edc
+
 https://www.easydoccontents.com
 
 
