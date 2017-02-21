@@ -5,6 +5,6 @@ export class InformationMap implements Indexable {
   id: number;
   label: string;
   file: string;
-  children?: Documentation[];
+  topics?: Documentation[];
   en: Documentation;
 }

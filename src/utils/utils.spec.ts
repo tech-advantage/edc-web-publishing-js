@@ -8,14 +8,14 @@ describe('utils', () => {
     let tree: Documentation[] = [
         mock(Documentation, {
           id: 1,
-          children: [
+          topics: [
             { id: 10 },
             {
               id: 11,
-              children: [
+              topics: [
                 {
                   id: 110,
-                  children: []
+                  topics: []
                 }
               ]
             }
@@ -23,10 +23,10 @@ describe('utils', () => {
         })
       ];
 
-    expect(Utils.indexTree(tree, 'informationMaps[0]', true)).toEqual({
-      10: 'informationMaps[0].children[0]',
-      11: 'informationMaps[0].children[1]',
-      110: 'informationMaps[0].children[1].children[0]'
+    expect(Utils.indexTree(tree, 'toc[0]', true)).toEqual({
+      10: 'toc[0].topics[0]',
+      11: 'toc[0].topics[1]',
+      110: 'toc[0].topics[1].topics[0]'
     });
   });
 })

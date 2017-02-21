@@ -33,20 +33,20 @@ export class EdcClient {
   /**
    * returns a promise retrieving all the informationMaps of the table of contents
    * for each informationMap, generates the indexTree and assign it to the general toc index
-   * @return {Promise<R>} a promise containing the informationMaps and setting the general toc index
+   * @return {Promise<R>} a promise containing the table of contents and setting the general toc index
    */
   getToc(): Promise<any> {
     return axios.get(`${this.baseURL}/toc.json`)
       .then(res => this.toc = <Toc>res.data)
       .then(res => {
 
-        return Promise.all(map(res.informationMaps, (informationMap, key) => axios.get(`${this.baseURL}/${informationMap.file}`)
+        return Promise.all(map(res.toc, (toc, key) => axios.get(`${this.baseURL}/${toc.file}`)
           .then(content => {
-          informationMap = assign(informationMap, content.data);
-          // define children property so informationMap can implement Indexable
-          informationMap.children = [informationMap.en];
+            toc = assign(toc, content.data);
+          // define topics property so informationMap can implement Indexable
+            toc.topics = [toc.en];
           // then assign the generated index tree to the toc index
-            this.toc.index = assign(this.toc.index, Utils.indexTree([informationMap], `informationMaps[${key}]`, true));
+            this.toc.index = assign(this.toc.index, Utils.indexTree([toc], `toc[${key}]`, true));
         }))).then(() => res);
       });
   }

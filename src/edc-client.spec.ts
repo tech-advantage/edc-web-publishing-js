@@ -50,7 +50,7 @@ describe('EDC client', () => {
 
      toc = {
        label: 'EDC IDE Eclipse',
-       informationMaps: [
+       toc: [
          {
            id: '2',
            file: 'toc-2.json'
@@ -86,7 +86,7 @@ describe('EDC client', () => {
 
         // indexTree generated from toc's infomap
         indexTree = {
-          5: 'informationMaps[0].children[0]'
+          5: 'toc[0].topics[0]'
         };
         spyOn(axios, 'get').and.callFake((arg: any): Promise<any> => promises[arg]);
         spyOn(Utils, 'indexTree').and.returnValue(indexTree);
@@ -99,8 +99,8 @@ describe('EDC client', () => {
           expect(axios.get).toHaveBeenCalledWith('http://base.url:8080/help/toc.json');
 
           // it's a little bit dirty but it works
-          // checking the mapping of the informationMaps
-          expect(res.informationMaps[0].children).toEqual([{ id: 5 }]);
+          // checking the mapping of the toc
+          expect(res.toc[0].topics).toEqual([{ id: 5 }]);
           expect(edcClient.toc.index).toEqual(indexTree);
           expect(axios.get).toHaveBeenCalledWith('http://base.url:8080/help/toc-2.json');
         });
@@ -158,15 +158,15 @@ describe('EDC client', () => {
       let tree: Documentation[] = [
         mock(Documentation, {
           id: 1,
-          children: [
+          topics: [
             { id: 10 },
             {
               id: 11,
-              children: [
+              topics: [
                 {
                   id: 110,
                   url: 'foo/bar',
-                  children: []
+                  topics: []
                 }
               ]
             }
@@ -176,9 +176,9 @@ describe('EDC client', () => {
       edcClient.toc = mock(Toc, {
         informationMaps: tree,
         index: {
-          10: 'informationMaps[0].children[0]',
-          11: 'informationMaps[0].children[1]',
-          110: 'informationMaps[0].children[1].children[0]'
+          10: 'toc[0].topics[0]',
+          11: 'toc[0].topics[1]',
+          110: 'toc[0].topics[1].topics[0]'
         }
       });
       edcClient.tocReady = Promise.resolve(edcClient.toc);
@@ -187,7 +187,7 @@ describe('EDC client', () => {
       edcClient.getDocumentation(110).then(doc => {
         expect(doc).toEqual({
           id: 110,
-          children: []
+          topics: []
         });
 
         expect(edcClient.getContent).toHaveBeenCalledWith('foo/bar');
