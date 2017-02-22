@@ -1,5 +1,7 @@
 # This plugin is meant to be used with edc
 
+easy doc contents is a simple yet powerful tool for agile-like documentation
+management.
 https://www.easydoccontents.com
 
 
