@@ -62,6 +62,14 @@ describe('EDC client', () => {
       edcClient.toc = toc;
     });
 
+    it('should get info', () => {
+      spyOn(axios, 'get').and.returnValue(Promise.resolve({}));
+
+      edcClient.getInfo();
+
+      expect(axios.get).toHaveBeenCalledWith('http://base.url:8080/help/info.json');
+    });
+
     it('should get context', () => {
       spyOn(axios, 'get').and.returnValue(Promise.resolve({}));
 

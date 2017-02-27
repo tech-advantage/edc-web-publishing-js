@@ -26,6 +26,10 @@ export class EdcClient {
     this.tocReady = this.getToc();
   }
 
+  getInfo(): Promise<any> {
+    return axios.get(`${this.baseURL}/info.json`).then(res => this.context = res.data);
+  }
+
   getContext(): Promise<any> {
     return axios.get(`${this.baseURL}/context.json`).then(res => this.context = res.data);
   }
