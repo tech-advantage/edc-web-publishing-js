@@ -5,23 +5,24 @@ import { Documentation } from './entities/documentation';
 import { mock, async } from './utils/test-utils';
 import { Toc } from './entities/toc';
 import { Utils } from './utils/utils';
+import Jasmine = jasmine.Jasmine;
 
 describe('EDC client', () => {
   let edcClient: EdcClient;
   let toc;
 
   describe('init', () => {
-    it('should init edc client', () => {
+    it('should init edc client', async(() => {
       spyOn(axios, 'create');
-      spyOn(axios, 'get').and.returnValue(Promise.resolve({}));
+      spyOn(axios, 'get').and.returnValue(Promise.resolve({data: undefined}));
       edcClient = new EdcClient('http://base.url:8080/help');
 
-      Promise.all([edcClient.contextReady, edcClient.tocReady]).then(() => {
-        expect(axios.create).toHaveBeenCalledWith({ baseURL: 'http://base.url:8080/help'});
+      return Promise.all([edcClient.contextReady, edcClient.tocReady]).then(() => {
+        expect(axios.create).toHaveBeenCalled();
         expect(axios.get).toHaveBeenCalledWith('http://base.url:8080/help/context.json');
         expect(axios.get).toHaveBeenCalledWith('http://base.url:8080/help/toc.json');
       });
-    });
+    }));
   });
 
   describe('runtime', () => {
@@ -127,41 +128,43 @@ describe('EDC client', () => {
       });
     });
 
-    it('should get article content', () => {
-      spyOn(axios, 'get').and.returnValue(Promise.resolve('baz'));
+    it('should get article content', async(() => {
+      spyOn(axios, 'get').and.returnValue(Promise.resolve({data: 'baz'}));
       let article = edcClient.context.foo.bar.en.articles[0];
 
 
-      edcClient.getContent(article).then(() => {
+      return edcClient.getContent(article).then(() => {
         expect(axios.get).toHaveBeenCalledWith('http://base.url:8080/help/bar');
         expect(article.content).toBe('baz');
       });
-    });
+    }));
 
-    it('should get helper', () => {
-      spyOn(edcClient, 'getContent').and.returnValue(Promise.resolve('baz'));
+    it('should get helper', async(() => {
+      spyOn(edcClient, 'getContent').and.returnValue(Promise.resolve({data: 'baz'}));
       edcClient.contextReady = Promise.resolve();
 
-      edcClient.getHelper('foo', 'bar').then(helper => {
+      return edcClient.getHelper('foo', 'bar').then(helper => {
+        expect(edcClient.getContent).toHaveBeenCalledWith(helper);
         expect(edcClient.getContent).toHaveBeenCalledWith(helper.articles[0]);
         expect(helper.articles.length).toBe(1);
-        expect(helper.articles[0]).toEqual({
-          label: 'foo',
-          url: 'bar',
-          content: 'baz'
-        });
       });
-    });
+    }));
 
-    it('should get undefined helper', () => {
+    it('should get undefined helper', async(() => {
       edcClient.contextReady = Promise.resolve();
-      edcClient.getHelper('foo', 'foo').then(helper => {
+      return edcClient.getHelper('foo', 'foo').then(helper => {
         expect(helper).toBe(undefined);
       });
-    });
+    }));
 
-    it('should get the documentation', () => {
-      spyOn(edcClient, 'getContent').and.returnValue(Promise.resolve('baz'));
+    it('should get the documentation', async(() => {
+      const documentation = {
+        id: 110,
+        url: 'foo/bar',
+        topics: []
+      };
+
+      spyOn(edcClient, 'getContent').and.returnValue(Promise.resolve(documentation));
 
       let tree: Documentation[] = [
         mock(Documentation, {
@@ -171,18 +174,14 @@ describe('EDC client', () => {
             {
               id: 11,
               topics: [
-                {
-                  id: 110,
-                  url: 'foo/bar',
-                  topics: []
-                }
+                documentation
               ]
             }
           ]
         })
       ];
       edcClient.toc = mock(Toc, {
-        informationMaps: tree,
+        toc: tree,
         index: {
           10: 'toc[0].topics[0]',
           11: 'toc[0].topics[1]',
@@ -192,14 +191,34 @@ describe('EDC client', () => {
       edcClient.tocReady = Promise.resolve(edcClient.toc);
 
 
-      edcClient.getDocumentation(110).then(doc => {
-        expect(doc).toEqual({
-          id: 110,
-          topics: []
-        });
+      return edcClient.getDocumentation(110).then(doc => {
+        expect(doc).toEqual(documentation);
 
-        expect(edcClient.getContent).toHaveBeenCalledWith('foo/bar');
+        expect(edcClient.getContent).toHaveBeenCalledWith(documentation);
       });
-    });
+    }));
+
+    it('should get the information map from doc id', async(() => {
+      let tree: Documentation[] = [
+        mock(Documentation, {
+          id: 1,
+          topics: [
+            { id: 10 }
+          ]
+        })
+      ];
+
+      edcClient.toc = mock(Toc, {
+        toc: tree,
+        index: {
+          10: 'toc[0].topics[0]'
+        }
+      });
+      edcClient.tocReady = Promise.resolve(edcClient.toc);
+
+      return edcClient.getInformationMapFromDocId(10).then(im => {
+        expect(im).toEqual(jasmine.objectContaining({id: 1}));
+      });
+    }));
   });
 });

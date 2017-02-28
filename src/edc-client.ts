@@ -1,4 +1,4 @@
-import { assign, map, get } from 'lodash';
+import { assign, map, get, split } from 'lodash';
 import { Promise } from 'es6-promise';
 import axios from 'axios';
 import { Helper } from './entities/helper';
@@ -6,6 +6,7 @@ import { Loadable } from './entities/loadable';
 import { Toc } from './entities/toc';
 import { Utils } from './utils/utils';
 import { Documentation } from './entities/documentation';
+import { InformationMap } from './entities/information-map';
 
 export class EdcClient {
   context: any;
@@ -43,15 +44,15 @@ export class EdcClient {
     return axios.get(`${this.baseURL}/toc.json`)
       .then(res => this.toc = <Toc>res.data)
       .then(res => {
-
-        return Promise.all(map(res.toc, (toc, key) => axios.get(`${this.baseURL}/${toc.file}`)
+        const tocs = get<InformationMap[]>(res, 'toc');
+        return Promise.all(map(tocs, (toc, key) => axios.get(`${this.baseURL}/${toc.file}`)
           .then(content => {
             toc = assign(toc, content.data);
-          // define topics property so informationMap can implement Indexable
+            // define topics property so informationMap can implement Indexable
             toc.topics = [toc.en];
-          // then assign the generated index tree to the toc index
+            // then assign the generated index tree to the toc index
             this.toc.index = assign(this.toc.index, Utils.indexTree([toc], `toc[${key}]`, true));
-        }))).then(() => res);
+          }))).then(() => res);
       });
   }
 
@@ -72,6 +73,15 @@ export class EdcClient {
       let path = this.toc.index[id];
       let doc = get<Documentation>(this.toc, path);
       return this.getContent(doc);
+    });
+  }
+
+  getInformationMapFromDocId(id: number) {
+    return this.tocReady.then(() => {
+      const path = this.toc.index[id];
+      const imPath = split(path, '.')[0];
+      const doc = get<Documentation>(this.toc, imPath);
+      return doc;
     });
   }
 
