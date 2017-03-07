@@ -1,15 +1,17 @@
 import { assign, map, get, split } from 'lodash';
-import { Promise } from 'es6-promise';
 import axios from 'axios';
+import { Promise } from 'es6-promise';
 import { Helper } from './entities/helper';
 import { Loadable } from './entities/loadable';
 import { Toc } from './entities/toc';
 import { Utils } from './utils/utils';
 import { Documentation } from './entities/documentation';
 import { InformationMap } from './entities/information-map';
+import { Info } from './entities/info';
 
 export class EdcClient {
   context: any;
+  info: Info;
   toc: Toc;
   contextReady: Promise<any>;
   tocReady: Promise<Toc>;
@@ -27,8 +29,8 @@ export class EdcClient {
     this.tocReady = this.getToc();
   }
 
-  getInfo(): Promise<any> {
-    return axios.get(`${this.baseURL}/info.json`).then(res => this.context = res.data);
+  getInfo(): Promise<Info> {
+    return axios.get(`${this.baseURL}/info.json`).then(res => this.info = res.data);
   }
 
   getContext(): Promise<any> {
@@ -80,8 +82,7 @@ export class EdcClient {
     return this.tocReady.then(() => {
       const path = this.toc.index[id];
       const imPath = split(path, '.')[0];
-      const doc = get<Documentation>(this.toc, imPath);
-      return doc;
+      return get<Documentation>(this.toc, imPath);
     });
   }
 

@@ -44,8 +44,8 @@ gulp.task('lint', function () {
     .pipe(tslint.report());
 });
 
-gulp.task('build', function (cb) {
-  let tsResult = gulp.src(['./src/**/*.ts', '!*.spec.ts'])
+gulp.task('build', function () {
+  const tsResult = gulp.src(['./src/**/*.ts', '!*.spec.ts'])
     .pipe(sourcemaps.init()) // This means sourcemaps will be generated
     .pipe(ts());
 

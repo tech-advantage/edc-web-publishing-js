@@ -5,7 +5,7 @@ import { Documentation } from './entities/documentation';
 import { mock, async } from './utils/test-utils';
 import { Toc } from './entities/toc';
 import { Utils } from './utils/utils';
-import Jasmine = jasmine.Jasmine;
+import { } from 'jasmine';
 
 describe('EDC client', () => {
   let edcClient: EdcClient;

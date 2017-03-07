@@ -1,6 +1,7 @@
 import { Utils } from './utils';
 import { mock } from './test-utils';
 import { Documentation } from '../entities/documentation';
+import { } from 'jasmine';
 
 describe('utils', () => {
   it('should return the paths map', () => {
