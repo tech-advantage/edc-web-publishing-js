@@ -152,9 +152,10 @@ describe('EDC client', () => {
 
     it('should get undefined helper', async(() => {
       edcClient.contextReady = Promise.resolve();
-      return edcClient.getHelper('foo', 'foo').then(helper => {
-        expect(helper).toBe(undefined);
-      });
+      return edcClient.getHelper('foo', 'foo').then(
+        (helper) => expect(helper).toBe(undefined),
+        () => {}
+      );
     }));
 
     it('should get the documentation', async(() => {

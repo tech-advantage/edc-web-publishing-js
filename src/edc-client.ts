@@ -65,6 +65,8 @@ export class EdcClient {
         helper = this.getKey(key, subKey, lang);
         if (helper) {
           return Promise.all([ this.getContent(helper), ...helper.articles.map(article => this.getContent(article)) ]);
+        } else {
+          return Promise.reject(undefined);
         }
       })
       .then(() => helper);
