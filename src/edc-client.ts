@@ -26,7 +26,7 @@ export class EdcClient {
     axios.create();
 
     this.contextReady = this.getContext();
-    this.tocReady = this.getToc();
+    this.tocReady = this.initToc();
   }
 
   getInfo(): Promise<Info> {
@@ -37,12 +37,16 @@ export class EdcClient {
     return axios.get(`${this.baseURL}/context.json`).then(res => this.context = res.data);
   }
 
+  getToc() {
+    return this.tocReady;
+  }
+
   /**
    * returns a promise retrieving all the informationMaps of the table of contents
    * for each informationMap, generates the indexTree and assign it to the general toc index
    * @return {Promise<R>} a promise containing the table of contents and setting the general toc index
    */
-  getToc(): Promise<any> {
+  initToc(): Promise<any> {
     return axios.get(`${this.baseURL}/toc.json`)
       .then(res => this.toc = <Toc>res.data)
       .then(res => {
@@ -80,11 +84,11 @@ export class EdcClient {
     });
   }
 
-  getInformationMapFromDocId(id: number) {
+  getInformationMapFromDocId(id: number): Promise<InformationMap> {
     return this.tocReady.then(() => {
       const path = this.toc.index[id];
       const imPath = split(path, '.')[0];
-      return get<Documentation>(this.toc, imPath);
+      return get<InformationMap>(this.toc, imPath);
     });
   }
 
