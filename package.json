@@ -1,6 +1,6 @@
 {
   "name": "edc-web-publishing-js",
-  "version": "1.0.0",
+  "version": "1.0.2-0",
   "description": "edc-web-publishing-js",
   "license": "MIT",
   "repository": "",
@@ -8,16 +8,13 @@
   "keywords": [
     ""
   ],
-  "files": [
-    "lib"
-  ],
-  "main": "lib/index.js",
-  "typings": "lib/index.d.ts",
+  "main": "index.js",
   "scripts": {
     "build": "gulp build",
     "lint": "gulp lint",
     "test": "gulp test",
-    "test-auto": "gulp test-auto"
+    "test-auto": "gulp test-auto",
+    "edc-publish": "npm run lint && npm run test && npm run build && npm publish"
   },
   "pre-push": "lint",
   "dependencies": {
