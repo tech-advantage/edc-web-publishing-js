@@ -19,13 +19,6 @@ No dependencies.
 
 
 ## Installation
-
-> EDIT : Not published on NPM yet, for now you should add this line in your package.json : 
-> ```bash
-> "edc-popover-ng": "git+https://github.com/tech-advantage/edc-web-publishing-js#{commitId}",
-> ```
-> Replace {commitId} with the last commit id on [GitHub repo](https://github.com/tech-advantage/edc-web-publishing-js/commits/master) and run `npm install` or `yarn install.`
-
 You can import your library with NPM in any Angular application by running:
 
 ```bash
