@@ -8,6 +8,7 @@ const uglify = require('gulp-uglify');
 const exec = require('child_process').exec;
 const path = require('path');
 const del = require('del');
+const debug = require('gulp-debug');
 const HubRegistry = require('gulp-hub');
 const tslintCustom = require('tslint'); // for tslint-next https://github.com/panuhorsmalahti/gulp-tslint#specifying-the-tslint-module
 require('dotbin');
@@ -45,7 +46,8 @@ gulp.task('lint', function () {
 });
 
 gulp.task('build', function () {
-  const tsResult = gulp.src(['./src/**/*.ts', '!*.spec.ts'])
+  const tsResult = gulp.src(['./src/**/*.ts', '!**/*.spec.ts'])
+    .pipe(debug())
     .pipe(sourcemaps.init()) // This means sourcemaps will be generated
     .pipe(ts());
 

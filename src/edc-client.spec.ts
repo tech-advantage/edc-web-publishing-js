@@ -79,7 +79,7 @@ describe('EDC client', () => {
       expect(axios.get).toHaveBeenCalledWith('http://base.url:8080/help/context.json');
     });
 
-    describe('should test getToc()', () => {
+    describe('should test initToc()', () => {
 
       let infoMap;
       let promises;
@@ -104,7 +104,7 @@ describe('EDC client', () => {
       it('should get table of content', async(() => {
 
         // return - for the async function
-        return edcClient.getToc().then((res) => {
+        return edcClient.initToc().then((res) => {
           expect(axios.get).toHaveBeenCalledWith('http://base.url:8080/help/toc.json');
 
           // it's a little bit dirty but it works

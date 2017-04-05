@@ -7,7 +7,7 @@ module.exports = function (config) {
     autoWatch: true,
     logLevel: 'INFO',
     browsers: [
-      'jsdom'
+      'Firefox'
     ],
     frameworks: [
       'jasmine',
@@ -24,7 +24,7 @@ module.exports = function (config) {
     plugins: [
       require('karma-jasmine'),
       require('karma-typescript'),
-      require('karma-jsdom-launcher')
+      require('karma-firefox-launcher')
     ]
   };
 

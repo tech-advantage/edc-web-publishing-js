@@ -1,32 +1,108 @@
-# This plugin is meant to be used with edc
+# edc help client
+_This project is meant to be used with **easy doc contents** (aka edc)._
 
-easy doc contents is a simple yet powerful tool for agile-like documentation
+edc is a simple yet powerful tool for agile-like documentation
 management.
-https://www.easydoccontents.com
+
+Learn more at [https://www.easydoccontents.com](https://www.easydoccontents.com).
+
+## Note
+
+If you have an Angular, application you can use our **edc help angular component** available here :
+
+https://github.com/tech-advantage/edc-popover-ng
 
 
-# Using this module in other modules
+## Dependencies
 
-Here is a quick example of how this module can be used in other modules. The [TypeScript Module Resolution Logic](https://www.typescriptlang.org/docs/handbook/module-resolution.html) makes it quite easy. The file `src/index.ts` acts as an aggregator of all the functionality in this module. It imports from other files and re-exports to provide a unified interface for this module. The _package.json_ file contains `main` attribute that points to the generated `lib/index.js` file and `typings` attribute that points to the generated `lib/index.d.ts` file.
+No dependencies.
 
-> If you are planning to have code in multiple files (which is quite natural for a NodeJS module) that users can import, make sure you update `src/index.ts` file appropriately.
 
-Now assuming you have published this amazing module to _npm_ with the name `my-amazing-lib`, and installed it in the module in which you need it -
+## Installation
+You can import your library with NPM in any Angular application by running:
 
-- To use the `Greeter` class in a TypeScript file -
-
-```ts
-import { Greeter } from "my-amazing-lib";
-
-const greeter = new Greeter("World!");
-greeter.greet();
+```bash
+$ npm install edc-web-publishing-js --save
 ```
 
-- To use the `Greeter` class in a JavaScript file -
+with YARN, use:
 
-```js
-const Greeter = require('my-amazing-lib').Greeter;
+```bash
+$ yarn add edc-web-publishing-js
 
-const greeter = new Greeter('World!');
-greeter.greet();
 ```
+
+## Usage
+
+The edc help client has been made to be used with any web framework.
+
+### Instantiating a new EdcClient
+
+To use the help client, you first have to instantiate a new EdcClient.
+
+Below is an exemple for an Angular Typescript project, where exported documentation is served on `/doc` url :
+
+```
+this.edcClient = new EdcClient('/doc/');
+```
+
+Note that you can use ES6 imports to import classes from `edc-web-publishinh-js` :
+
+```
+import { EdcClient, Documentation, Helper, InformationMap } from 'edc-web-publishing-js';
+```
+
+### Calling client 
+
+The edc help client expose several methods to get content :
+
+* getInfo()
+
+Returns a promise containing the content of the `info.json` file  from the export.
+
+* getContext()
+
+Returns a promise containing the content of the `context.json` file  from the export.
+
+* getToc(): Promise\<Toc\>
+
+Returns a promise containing a table of content as `Toc` (see [Toc](https://github.com/tech-advantage/edc-web-publishing-js/blob/master/src/entities/toc.ts) object) representing the content of the `toc.json` file  from the export.
+
+```
+edcClient.getToc().then(toc: Toc => this.toc = toc);
+```
+
+* getHelper(mainKey, subKey): Promise\<Helper\>
+
+Useful to get help content (see [Helper](https://github.com/tech-advantage/edc-web-publishing-js/blob/master/src/entities/helper.ts) object) for a particular key/subkey.
+
+* getDocumentation(idDocumentation): Promise\<Documentation\>
+
+Useful to get help content (see [Documentation](https://github.com/tech-advantage/edc-web-publishing-js/blob/master/src/entities/documentation.ts) object) for a particular documentation.
+
+* getInformationMapFromDocId(): Promise\<InformationMap\>
+
+Useful to retrieve information map for a particular documentation.
+
+See [InformationMap](https://github.com/tech-advantage/edc-web-publishing-js/blob/master/src/entities/information-map.ts).
+
+* getContent()
+
+_Will be private in next release._
+
+* getKey()
+
+_Will be private in next release._
+
+## More
+
+If you want more information, you can check our Angular help component library using this edc help client :
+
+https://github.com/tech-advantage/edc-popover-ng
+
+
+## License
+
+Eclipse Public License - v 1.0 © [TECH'advantage](mailto:contact@tech-advantage.com)
+
+

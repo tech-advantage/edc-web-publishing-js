@@ -21,10 +21,8 @@ module.exports = function (config) {
         'karma-typescript'
       ]
     },
-    reporters: ['kjhtml'],
     plugins: [
       require('karma-jasmine'),
-      require('karma-jasmine-html-reporter'),
       require('karma-typescript'),
       require('karma-firefox-launcher')
     ]
