@@ -56,15 +56,15 @@ import { EdcClient, Documentation, Helper, InformationMap } from 'edc-web-publis
 
 The edc help client expose several methods to get content :
 
-* getInfo()
+* **getInfo()**
 
 Returns a promise containing the content of the `info.json` file  from the export.
 
-* getContext()
+* **getContext()**
 
 Returns a promise containing the content of the `context.json` file  from the export.
 
-* getToc(): Promise\<Toc\>
+* **getToc(): Promise\<Toc\>**
 
 Returns a promise containing a table of content as `Toc` (see [Toc](https://github.com/tech-advantage/edc-web-publishing-js/blob/master/src/entities/toc.ts) object) representing the content of the `toc.json` file  from the export.
 
@@ -72,25 +72,39 @@ Returns a promise containing a table of content as `Toc` (see [Toc](https://gith
 edcClient.getToc().then(toc: Toc => this.toc = toc);
 ```
 
-* getHelper(mainKey, subKey): Promise\<Helper\>
+* **getHelper(mainKey, subKey): Promise\<Helper\>**
 
 Useful to get help content (see [Helper](https://github.com/tech-advantage/edc-web-publishing-js/blob/master/src/entities/helper.ts) object) for a particular key/subkey.
 
-* getDocumentation(idDocumentation): Promise\<Documentation\>
+* **getDocumentation(idDocumentation): Promise\<Documentation\>**
 
 Useful to get help content (see [Documentation](https://github.com/tech-advantage/edc-web-publishing-js/blob/master/src/entities/documentation.ts) object) for a particular documentation.
 
-* getInformationMapFromDocId(): Promise\<InformationMap\>
+* **getInformationMapFromDocId(): Promise\<InformationMap\>**
 
 Useful to retrieve information map for a particular documentation.
 
 See [InformationMap](https://github.com/tech-advantage/edc-web-publishing-js/blob/master/src/entities/information-map.ts).
 
-* getContent()
+* **getResource(type: ResourceType): Promise\<string\>**
+
+Returns a promise containing a resource image.
+
+This image is a base64 encoded string with the format: 'data:image/ico;base64,XXXXX'.
+
+```
+import { ResourceType } from 'edc-web-publishing-js';
+
+edcClient.getResource(ResourceType.LOGO_HEADER).then(logo: string => this.logo = logo);
+```
+ResourceType is an exported enum and can be 'LOGO_HEADER', 'LOGO_INFO' or 'FAVICON'.
+
+
+* **getContent()**
 
 _Will be private in next release._
 
-* getKey()
+* **getKey()**
 
 _Will be private in next release._
 
@@ -103,6 +117,6 @@ https://github.com/tech-advantage/edc-popover-ng
 
 ## License
 
-Eclipse Public License - v 1.0 © [TECH'advantage](mailto:contact@tech-advantage.com)
+MIT [TECH'advantage](mailto:contact@tech-advantage.com)
 
 

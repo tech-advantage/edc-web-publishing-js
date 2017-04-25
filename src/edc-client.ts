@@ -38,7 +38,7 @@ export class EdcClient {
     return axios.get(`${this.baseURL}/context.json`).then(res => this.context = res.data);
   }
 
-  getResource(type: ResourceType): Promise<any> {
+  getResource(type: ResourceType): Promise<string> {
     return axios.get(`${this.baseURL}/${ResourceName[type]}`, {responseType: 'arraybuffer'}).then(res => this.encode(res.data, type));
   }
 
@@ -109,7 +109,7 @@ export class EdcClient {
     return get<Helper>(this.context, `['${key}']['${subKey}']['${lang}']`);
   }
 
-  private encode(arrayBuffer: Uint8Array, type: ResourceType) {
+  private encode(arrayBuffer: Uint8Array, type: ResourceType): string {
     const b64encoded = btoa([].reduce.call(new Uint8Array(arrayBuffer), (p: any, c: any) => p + String.fromCharCode(c), ''));
     const mimetype = `image/${ResouceExtension[type]}`;
     return `data:${mimetype};base64,${b64encoded}`;
