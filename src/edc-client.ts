@@ -1,6 +1,5 @@
 import { assign, map, get, split } from 'lodash';
 import axios from 'axios';
-import { Promise } from 'es6-promise';
 import { Helper } from './entities/helper';
 import { Loadable } from './entities/loadable';
 import { Toc } from './entities/toc';
@@ -9,6 +8,7 @@ import { Documentation } from './entities/documentation';
 import { InformationMap } from './entities/information-map';
 import { Info } from './entities/info';
 import { ResourceType, ResouceExtension, ResourceName } from './entities/resource-type';
+import { Promise as PromiseEs6 } from 'es6-promise';
 
 export class EdcClient {
   context: any;
@@ -56,7 +56,7 @@ export class EdcClient {
       .then(res => this.toc = <Toc>res.data)
       .then(res => {
         const tocs = get<InformationMap[]>(res, 'toc');
-        return Promise.all(map(tocs, (toc, key) => axios.get(`${this.baseURL}/${toc.file}`)
+        return PromiseEs6.all(map(tocs, (toc, key) => axios.get(`${this.baseURL}/${toc.file}`)
           .then(content => {
             toc = assign(toc, content.data);
             // define topics property so informationMap can implement Indexable
@@ -73,9 +73,9 @@ export class EdcClient {
       .then(() => {
         helper = this.getKey(key, subKey, lang);
         if (helper) {
-          return Promise.all([ this.getContent(helper), ...helper.articles.map(article => this.getContent(article)) ]);
+          return PromiseEs6.all([ this.getContent(helper), ...helper.articles.map(article => this.getContent(article)) ]);
         } else {
-          return Promise.reject(undefined);
+          return PromiseEs6.reject(undefined);
         }
       })
       .then(() => helper);
