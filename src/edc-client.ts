@@ -7,7 +7,6 @@ import { Utils } from './utils/utils';
 import { Documentation } from './entities/documentation';
 import { InformationMap } from './entities/information-map';
 import { Info } from './entities/info';
-import { ResourceType, ResouceExtension, ResourceName } from './entities/resource-type';
 import { Promise as PromiseEs6 } from 'es6-promise';
 
 export class EdcClient {
@@ -36,10 +35,6 @@ export class EdcClient {
 
   getContext(): Promise<any> {
     return axios.get(`${this.baseURL}/context.json`).then(res => this.context = res.data);
-  }
-
-  getResource(type: ResourceType): Promise<string> {
-    return axios.get(`${this.baseURL}/${ResourceName[type]}`, {responseType: 'arraybuffer'}).then(res => this.encode(res.data, type));
   }
 
   getToc() {
@@ -107,12 +102,6 @@ export class EdcClient {
 
   getKey(key: string, subKey: string, lang: string): Helper {
     return get<Helper>(this.context, `['${key}']['${subKey}']['${lang}']`);
-  }
-
-  private encode(arrayBuffer: Uint8Array, type: ResourceType): string {
-    const b64encoded = btoa([].reduce.call(new Uint8Array(arrayBuffer), (p: any, c: any) => p + String.fromCharCode(c), ''));
-    const mimetype = `image/${ResouceExtension[type]}`;
-    return `data:${mimetype};base64,${b64encoded}`;
   }
 
 }

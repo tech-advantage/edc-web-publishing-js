@@ -12,4 +12,3 @@ export { ArticleType } from './src/entities/article-type';
 export { Toc } from './src/entities/toc';
 export { InformationMap } from './src/entities/information-map';
 export { Helper } from './src/entities/helper';
-export { ResourceType, ResourceName, ResouceExtension } from './src/entities/resource-type';

@@ -86,19 +86,6 @@ Useful to retrieve information map for a particular documentation.
 
 See [InformationMap](https://github.com/tech-advantage/edc-web-publishing-js/blob/master/src/entities/information-map.ts).
 
-* **getResource(type: ResourceType): Promise\<string\>**
-
-Returns a promise containing a resource image.
-
-This image is a base64 encoded string with the format: 'data:image/ico;base64,XXXXX'.
-
-```
-import { ResourceType } from 'edc-web-publishing-js';
-
-edcClient.getResource(ResourceType.LOGO_HEADER).then(logo: string => this.logo = logo);
-```
-ResourceType is an exported enum and can be 'LOGO_HEADER', 'LOGO_INFO' or 'FAVICON'.
-
 
 * **getContent()**
 
