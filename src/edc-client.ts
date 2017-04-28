@@ -78,8 +78,8 @@ export class EdcClient {
 
   getDocumentation(id: number): Promise<Documentation> {
     return this.tocReady.then(() => {
-      let path = this.toc.index[id];
-      let doc = get<Documentation>(this.toc, path);
+      const path = this.toc.index[id];
+      const doc = get<Documentation>(this.toc, path);
       return this.getContent(doc);
     });
   }
