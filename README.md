@@ -1,6 +1,4 @@
-# edc help client
-# DEPRECATED: please use edc-client-js instead.
-## https://www.npmjs.com/package/edc-client-js
+# edc-client-js
 _This project is meant to be used with **easy doc contents** (aka edc)._
 
 edc is a simple yet powerful tool for agile-like documentation
@@ -24,13 +22,13 @@ No dependencies.
 You can import your library with NPM in any Angular application by running:
 
 ```bash
-$ npm install edc-web-publishing-js --save
+$ npm install edc-client-js --save
 ```
 
 with YARN, use:
 
 ```bash
-$ yarn add edc-web-publishing-js
+$ yarn add edc-client-js
 
 ```
 
@@ -48,10 +46,10 @@ Below is an exemple for an Angular Typescript project, where exported documentat
 this.edcClient = new EdcClient('/doc/');
 ```
 
-Note that you can use ES6 imports to import classes from `edc-web-publishinh-js` :
+Note that you can use ES6 imports to import classes from `edc-client-js` :
 
 ```
-import { EdcClient, Documentation, Helper, InformationMap } from 'edc-web-publishing-js';
+import { EdcClient, Documentation, Helper, InformationMap } from 'edc-client-js';
 ```
 
 ### Calling client 
@@ -68,7 +66,7 @@ Returns a promise containing the content of the `context.json` file  from the ex
 
 * **getToc(): Promise\<Toc\>**
 
-Returns a promise containing a table of content as `Toc` (see [Toc](https://github.com/tech-advantage/edc-web-publishing-js/blob/master/src/entities/toc.ts) object) representing the content of the `toc.json` file  from the export.
+Returns a promise containing a table of content as `Toc` (see [Toc](https://github.com/tech-advantage/edc-client-js/blob/master/src/entities/toc.ts) object) representing the content of the `toc.json` file  from the export.
 
 ```
 edcClient.getToc().then(toc: Toc => this.toc = toc);
@@ -76,17 +74,17 @@ edcClient.getToc().then(toc: Toc => this.toc = toc);
 
 * **getHelper(mainKey, subKey): Promise\<Helper\>**
 
-Useful to get help content (see [Helper](https://github.com/tech-advantage/edc-web-publishing-js/blob/master/src/entities/helper.ts) object) for a particular key/subkey.
+Useful to get help content (see [Helper](https://github.com/tech-advantage/edc-client-js/blob/master/src/entities/helper.ts) object) for a particular key/subkey.
 
 * **getDocumentation(idDocumentation): Promise\<Documentation\>**
 
-Useful to get help content (see [Documentation](https://github.com/tech-advantage/edc-web-publishing-js/blob/master/src/entities/documentation.ts) object) for a particular documentation.
+Useful to get help content (see [Documentation](https://github.com/tech-advantage/edc-client-js/blob/master/src/entities/documentation.ts) object) for a particular documentation.
 
 * **getInformationMapFromDocId(): Promise\<InformationMap\>**
 
 Useful to retrieve information map for a particular documentation.
 
-See [InformationMap](https://github.com/tech-advantage/edc-web-publishing-js/blob/master/src/entities/information-map.ts).
+See [InformationMap](https://github.com/tech-advantage/edc-client-js/blob/master/src/entities/information-map.ts).
 
 
 * **getContent()**
