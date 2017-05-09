@@ -1,4 +1,6 @@
 # edc help client
+# DEPRECATED: please use edc-client-js instead.
+## https://www.npmjs.com/package/edc-client-js
 _This project is meant to be used with **easy doc contents** (aka edc)._
 
 edc is a simple yet powerful tool for agile-like documentation
