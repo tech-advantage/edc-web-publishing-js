@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Helper } from './entities/helper';
 import { Loadable } from './entities/loadable';
 import { Toc } from './entities/toc';
-import { Utils } from './utils/utils';
+import { log, Utils } from './utils/utils';
 import { Documentation } from './entities/documentation';
 import { InformationMap } from './entities/information-map';
 import { Info } from './entities/info';
@@ -30,11 +30,11 @@ export class EdcClient {
   }
 
   getInfo(): Promise<Info> {
-    return axios.get(`${this.baseURL}/info.json`).then(res => this.info = res.data);
+    return axios.get(`${this.baseURL}/info.json`).then(res => this.info = res.data, log);
   }
 
   getContext(): Promise<any> {
-    return axios.get(`${this.baseURL}/context.json`).then(res => this.context = res.data);
+    return axios.get(`${this.baseURL}/context.json`).then(res => this.context = res.data, log);
   }
 
   getToc() {
@@ -58,7 +58,8 @@ export class EdcClient {
             toc.topics = [toc.en];
             // then assign the generated index tree to the toc index
             this.toc.index = assign(this.toc.index, Utils.indexTree([toc], `toc[${key}]`, true));
-          }))).then(() => res);
+          }, log)))
+          .then(() => res, log);
       });
   }
 
@@ -72,7 +73,7 @@ export class EdcClient {
         } else {
           return PromiseEs6.reject(undefined);
         }
-      })
+      }, log)
       .then(() => helper);
   }
 
@@ -81,7 +82,7 @@ export class EdcClient {
       const path = this.toc.index[id];
       const doc = get<Documentation>(this.toc, path);
       return this.getContent(doc);
-    });
+    }, log);
   }
 
   getInformationMapFromDocId(id: number): Promise<InformationMap> {
@@ -89,7 +90,7 @@ export class EdcClient {
       const path = this.toc.index[id];
       const imPath = split(path, '.')[0];
       return get<InformationMap>(this.toc, imPath);
-    });
+    }, log);
   }
 
   getContent(item: Loadable): Promise<Loadable> {
@@ -97,7 +98,7 @@ export class EdcClient {
       .then(res => {
         item.content = res.data;
         return item;
-      });
+      }, log);
   }
 
   getKey(key: string, subKey: string, lang: string): Helper {
