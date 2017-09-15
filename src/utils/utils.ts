@@ -30,7 +30,3 @@ export class Utils {
     }, {});
   }
 }
-
-export function log() {
-  console.warn('Error in promise : ', arguments);
-}

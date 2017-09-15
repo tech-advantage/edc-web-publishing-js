@@ -1430,7 +1430,7 @@ gulp-concat@2.6.1:
     through2 "^2.0.0"
     vinyl "^2.0.0"
 
-gulp-debug@^3.1.0:
+gulp-debug@3.1.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/gulp-debug/-/gulp-debug-3.1.0.tgz#4da91568b54915be803696caaac10c895b2c0a71"
   dependencies:
@@ -2065,9 +2065,9 @@ karma-sourcemap-loader@0.3.7:
   dependencies:
     graceful-fs "^4.1.2"
 
-karma-typescript@3.0.1:
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/karma-typescript/-/karma-typescript-3.0.1.tgz#64619473a68973773ec3132f96be06da7428427e"
+karma-typescript@3.0.4:
+  version "3.0.4"
+  resolved "https://registry.yarnpkg.com/karma-typescript/-/karma-typescript-3.0.4.tgz#9cdeeeddd1671693440c34ec62aba2d6ff9e4b05"
   dependencies:
     acorn "^4.0.4"
     amdefine "1.0.0"
@@ -3649,9 +3649,9 @@ type-is@~1.6.14:
     media-typer "0.3.0"
     mime-types "~2.1.13"
 
-typescript@2.2.2:
-  version "2.2.2"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-2.2.2.tgz#606022508479b55ffa368b58fee963a03dfd7b0c"
+typescript@2.4.2:
+  version "2.4.2"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-2.4.2.tgz#f8395f85d459276067c988aa41837a8f82870844"
 
 uglify-js@2.7.5, uglify-js@^2.6:
   version "2.7.5"

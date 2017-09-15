@@ -3,11 +3,12 @@ import axios from 'axios';
 import { Helper } from './entities/helper';
 import { Loadable } from './entities/loadable';
 import { Toc } from './entities/toc';
-import { log, Utils } from './utils/utils';
+import { Utils } from './utils/utils';
 import { Documentation } from './entities/documentation';
 import { InformationMap } from './entities/information-map';
 import { Info } from './entities/info';
 import { Promise as PromiseEs6 } from 'es6-promise';
+import { Article } from './entities/article';
 
 export class EdcClient {
   context: any;
@@ -30,11 +31,11 @@ export class EdcClient {
   }
 
   getInfo(): Promise<Info> {
-    return axios.get(`${this.baseURL}/info.json`).then(res => this.info = res.data, log);
+    return axios.get(`${this.baseURL}/info.json`).then(res => this.info = res.data);
   }
 
   getContext(): Promise<any> {
-    return axios.get(`${this.baseURL}/context.json`).then(res => this.context = res.data, log);
+    return axios.get(`${this.baseURL}/context.json`).then(res => this.context = res.data);
   }
 
   getToc() {
@@ -58,8 +59,8 @@ export class EdcClient {
             toc.topics = [toc.en];
             // then assign the generated index tree to the toc index
             this.toc.index = assign(this.toc.index, Utils.indexTree([toc], `toc[${key}]`, true));
-          }, log)))
-          .then(() => res, log);
+          })))
+          .then(() => res);
       });
   }
 
@@ -69,11 +70,11 @@ export class EdcClient {
       .then(() => {
         helper = this.getKey(key, subKey, lang);
         if (helper) {
-          return PromiseEs6.all([ this.getContent(helper), ...helper.articles.map(article => this.getContent(article)) ]);
+          return PromiseEs6.all([ this.getContent<Helper>(helper), ...helper.articles.map(article => this.getContent<Article>(article)) ]);
         } else {
           return PromiseEs6.reject(undefined);
         }
-      }, log)
+      })
       .then(() => helper);
   }
 
@@ -81,8 +82,8 @@ export class EdcClient {
     return this.tocReady.then(() => {
       const path = this.toc.index[id];
       const doc = get<Documentation>(this.toc, path);
-      return this.getContent(doc);
-    }, log);
+      return this.getContent<Documentation>(doc);
+    });
   }
 
   getInformationMapFromDocId(id: number): Promise<InformationMap> {
@@ -90,15 +91,15 @@ export class EdcClient {
       const path = this.toc.index[id];
       const imPath = split(path, '.')[0];
       return get<InformationMap>(this.toc, imPath);
-    }, log);
+    });
   }
 
-  getContent(item: Loadable): Promise<Loadable> {
+  getContent<T extends Loadable>(item: T): Promise<T> {
     return axios.get(`${this.baseURL}/${item.url}`)
       .then(res => {
         item.content = res.data;
         return item;
-      }, log);
+      });
   }
 
   getKey(key: string, subKey: string, lang: string): Helper {
