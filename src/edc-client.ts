@@ -49,7 +49,7 @@ export class EdcClient {
    */
   initToc(): Promise<any> {
     return axios.get(`${this.baseURL}/toc.json`)
-      .then(res => this.toc = <Toc>res.data)
+      .then(res => this.toc = res.data)
       .then(res => {
         const tocs = get<InformationMap[]>(res, 'toc');
         return PromiseEs6.all(map(tocs, (toc, key) => axios.get(`${this.baseURL}/${toc.file}`)
@@ -64,7 +64,7 @@ export class EdcClient {
       });
   }
 
-  getHelper(key: string, subKey: string, lang: string = 'en'): Promise<Helper> {
+  getHelper(key: string, subKey: string, lang = 'en'): Promise<Helper> {
     let helper: Helper;
     return this.contextReady
       .then(() => {
@@ -81,8 +81,12 @@ export class EdcClient {
   getDocumentation(id: number): Promise<Documentation> {
     return this.tocReady.then(() => {
       const path = this.toc.index[id];
-      const doc = get<Documentation>(this.toc, path);
-      return this.getContent<Documentation>(doc);
+      if (path) {
+        const doc = get<Documentation>(this.toc, path);
+        return this.getContent<Documentation>(doc);
+      } else {
+        console.error(`Documentation [${id}] not found in table of content. Toc : `, this.toc);
+      }
     });
   }
 
