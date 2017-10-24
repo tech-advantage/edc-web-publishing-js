@@ -1,76 +1,96 @@
-import { assign, map, get, split } from 'lodash';
-import axios from 'axios';
+import { get, isEmpty, isNil, join, some, split } from 'lodash';
 import { Helper } from './entities/helper';
-import { Loadable } from './entities/loadable';
 import { Toc } from './entities/toc';
-import { Utils } from './utils/utils';
+import { MultiToc } from './entities/multi-toc';
 import { Documentation } from './entities/documentation';
 import { InformationMap } from './entities/information-map';
-import { Info } from './entities/info';
 import { Promise as PromiseEs6 } from 'es6-promise';
 import { Article } from './entities/article';
+import { DocumentationExport } from './entities/documentation-export';
+import * as edcClientService from './edc-client-service';
+import { ContentTypeSuffix } from './entities/content-type';
 
 export class EdcClient {
   context: any;
-  info: Info;
-  toc: Toc;
+  globalToc: MultiToc;
+  currentExportId: string;
   contextReady: Promise<any>;
-  tocReady: Promise<Toc>;
+  globalTocReady: Promise<MultiToc>;
   baseURL: string;
 
-  constructor(baseURL?: string) {
-    this.init(baseURL);
-  }
-
-  init(baseURL: string) {
+  constructor(baseURL?: string, exportId?: string) {
     this.baseURL = baseURL;
-    axios.create();
-
-    this.contextReady = this.getContext();
-    this.tocReady = this.initToc();
+    this.currentExportId = exportId;
+    this.init(exportId);
   }
 
-  getInfo(): Promise<Info> {
-    return axios.get(`${this.baseURL}/info.json`).then(res => this.info = res.data);
+  init(exportId?: string) {
+    this.globalTocReady = this.initMultiToc();
+    this.contextReady = this.initContext(exportId);
   }
 
-  getContext(): Promise<any> {
-    return axios.get(`${this.baseURL}/context.json`).then(res => this.context = res.data);
+  initMultiToc(): Promise<MultiToc> {
+    return edcClientService.createMultiToc(this.baseURL)
+      .then((multiToc: MultiToc) => this.globalToc = multiToc);
   }
 
-  getToc() {
-    return this.tocReady;
-  }
-
-  /**
-   * returns a promise retrieving all the informationMaps of the table of contents
-   * for each informationMap, generates the indexTree and assign it to the general toc index
-   * @return {Promise<R>} a promise containing the table of contents and setting the general toc index
-   */
-  initToc(): Promise<any> {
-    return axios.get(`${this.baseURL}/toc.json`)
-      .then(res => this.toc = res.data)
-      .then(res => {
-        const tocs = get<InformationMap[]>(res, 'toc');
-        return PromiseEs6.all(map(tocs, (toc, key) => axios.get(`${this.baseURL}/${toc.file}`)
-          .then(content => {
-            toc = assign(toc, content.data);
-            // define topics property so informationMap can implement Indexable
-            toc.topics = [toc.en];
-            // then assign the generated index tree to the toc index
-            this.toc.index = assign(this.toc.index, Utils.indexTree([toc], `toc[${key}]`, true));
-          })))
-          .then(() => res);
+  initContext(exportId?: string): Promise<any> {
+    return this.globalTocReady
+      .then(() => this.getContext())
+      .then(context => {
+        this.setCurrentExport(exportId);
+        return this.context = context;
       });
   }
 
-  getHelper(key: string, subKey: string, lang = 'en'): Promise<Helper> {
+  setCurrentExport(newExportId: string): void {
+    this.currentExportId = this.checkExportId(newExportId);
+  }
+
+  /**
+   * get the toc for a given export from its exportId
+   * if exportId is not defined return the toc for the current export
+   * @param {string} targetExport the identifier of the export
+   * @return {Promise<Toc>} the toc of the export
+   */
+  getToc(targetExport?: string): Promise<Toc> {
+    return this.globalTocReady.then((tocs: MultiToc) => {
+      const exportId = this.checkExportId(targetExport);
+      return get<Toc>(edcClientService.findExportById(tocs.exports, exportId), 'toc');
+    });
+  }
+
+  getInfo(targetExport?: string): Promise<any> {
+    return this.getHelpContent(targetExport, ContentTypeSuffix.TYPE_INFO_SUFFIX);
+  }
+
+  getContext(targetExport?: string): Promise<any> {
+    return this.getHelpContent(targetExport, ContentTypeSuffix.TYPE_CONTEXT_SUFFIX);
+  }
+
+  getHelpContent(targetExport: string, suffix: ContentTypeSuffix): Promise<any> {
+    if (isNil(this.currentExportId)) {
+      return this.globalTocReady.then(() => {
+        const exportId = this.checkExportId(targetExport);
+        return edcClientService.getHelpContent(`${this.baseURL}/${exportId}`, suffix);
+      });
+    }
+    return edcClientService.getHelpContent(`${this.baseURL}/${this.currentExportId}`, suffix);
+  }
+
+  getHelper(key: string, subKey: string, lang: string = 'en'): Promise<Helper> {
     let helper: Helper;
-    return this.contextReady
+    let deferred: Promise<any> = this.contextReady;
+    if (!deferred) {
+      deferred = this.initContext();
+    }
+    return deferred
       .then(() => {
         helper = this.getKey(key, subKey, lang);
         if (helper) {
-          return PromiseEs6.all([ this.getContent<Helper>(helper), ...helper.articles.map(article => this.getContent<Article>(article)) ]);
+          return PromiseEs6.all(
+            [ edcClientService.getContent<Helper>(this.baseURL, helper), ...helper.articles.map(article => edcClientService.getContent<Article>(this.baseURL, article)) ]
+          );
         } else {
           return PromiseEs6.reject(undefined);
         }
@@ -78,36 +98,54 @@ export class EdcClient {
       .then(() => helper);
   }
 
+  /**
+   * get the documentation from its id
+   * will set the current export to that of the requested documentation
+   * @param {number} id
+   * @return {Promise<Documentation>}
+   */
   getDocumentation(id: number): Promise<Documentation> {
-    return this.tocReady.then(() => {
-      const path = this.toc.index[id];
-      if (path) {
-        const doc = get<Documentation>(this.toc, path);
-        return this.getContent<Documentation>(doc);
+    return this.globalTocReady.then(() => {
+      const doc = edcClientService.getDocumentationById(this.globalToc, id);
+      if (doc) {
+        return edcClientService.getContent<Documentation>(this.baseURL, doc);
       } else {
-        console.error(`Documentation [${id}] not found in table of content. Toc : `, this.toc);
+        console.error(`Documentation [${id}] not found in table of content`);
       }
     });
   }
 
   getInformationMapFromDocId(id: number): Promise<InformationMap> {
-    return this.tocReady.then(() => {
-      const path = this.toc.index[id];
-      const imPath = split(path, '.')[0];
-      return get<InformationMap>(this.toc, imPath);
+    return this.globalTocReady.then(() => {
+      const docPath = this.globalToc.index[ id ];
+      const iMPath = join(split(docPath, '.', 3), '.');
+      return get<InformationMap>(this.globalToc, iMPath);
     });
-  }
-
-  getContent<T extends Loadable>(item: T): Promise<T> {
-    return axios.get(`${this.baseURL}/${item.url}`)
-      .then(res => {
-        item.content = res.data;
-        return item;
-      });
   }
 
   getKey(key: string, subKey: string, lang: string): Helper {
     return get<Helper>(this.context, `['${key}']['${subKey}']['${lang}']`);
+  }
+
+  checkExportId(exportId: string): string {
+    if (this.isExportPresent(exportId)) {
+      return exportId;
+    }
+    return this.getCurrentExportId();
+  }
+
+  isExportPresent(exportId: string): boolean {
+    if (!this.globalToc || isEmpty(this.globalToc.exports)) {
+      return false;
+    }
+    return !isNil(exportId) && some(this.globalToc.exports, (docExport: DocumentationExport) => docExport.pluginId === exportId);
+  }
+
+  getCurrentExportId(): string {
+    if (!isNil(this.currentExportId)) {
+      return this.currentExportId;
+    }
+    return get<string>(this.globalToc, 'exports[0].pluginId');
   }
 
 }
