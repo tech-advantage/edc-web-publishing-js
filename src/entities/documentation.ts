@@ -5,6 +5,7 @@ import { Link } from './link';
 
 export class Documentation implements Loadable, Indexable, Linkable {
   id: number;
+  exportId: string;
   label: string;
   topics: Documentation[];
   url: string;

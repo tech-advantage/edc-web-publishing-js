@@ -1,4 +1,4 @@
-import { assign, find, get, map } from 'lodash';
+import { assign, find, get, map, split } from 'lodash';
 import axios, { AxiosResponse } from 'axios';
 import { DocumentationExport } from './entities/documentation-export';
 import { Toc } from './entities/toc';
@@ -19,8 +19,8 @@ export function createMultiToc(baseURL: string): Promise<MultiToc> {
 }
 
 export function getHelpContent(baseUrl: string, suffix: ContentTypeSuffix): Promise<any> {
-  return axios.get(`${baseUrl}/${suffix}`)
-    .then((res: AxiosResponse<any>) => get<number>(res, 'status') === 200 ? res.data : []);
+  return axios.get(`${baseUrl}${suffix}`)
+    .then((res: AxiosResponse) => get<number>(res, 'status') === 200 ? res.data : []);
 }
 
 export function addTocIMsToIndex(baseUrl: string, sourceExport: DocumentationExport, exportIndex: number, multiToc: MultiToc): Promise<DocumentationExport> {
@@ -50,6 +50,12 @@ export function getContent<T extends Loadable>(baseURL: string, item: T): Promis
 
 export function findExportById(exports: DocumentationExport[], id: string): DocumentationExport {
   return find(exports, (docExport: DocumentationExport) => docExport.pluginId === id);
+}
+
+export function getPluginIdFromDocumentId(globalToc: MultiToc, docId: number): string {
+  const docPath = globalToc.index[ docId ];
+  const exportPath = split(docPath, '.')[ 0 ];
+  return get<string>(globalToc, `${exportPath}.pluginId`);
 }
 
 function addSingleIMContentToIndex(im: InformationMap, content: InformationMap, exportIndex: number, key: number, multiToc: MultiToc): void {

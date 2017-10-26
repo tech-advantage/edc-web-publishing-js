@@ -9,24 +9,26 @@ import { Article } from './entities/article';
 import { DocumentationExport } from './entities/documentation-export';
 import * as edcClientService from './edc-client-service';
 import { ContentTypeSuffix } from './entities/content-type';
+import { getPluginIdFromDocumentId } from './edc-client-service';
+import { DocumentationTransfer } from './entities/documentation-transfer';
+import { Info } from './entities/info';
 
 export class EdcClient {
   context: any;
   globalToc: MultiToc;
-  currentExportId: string;
+  currentPluginId: string;
   contextReady: Promise<any>;
   globalTocReady: Promise<MultiToc>;
   baseURL: string;
 
   constructor(baseURL?: string, exportId?: string) {
     this.baseURL = baseURL;
-    this.currentExportId = exportId;
     this.init(exportId);
   }
 
-  init(exportId?: string) {
+  init(pluginId?: string) {
     this.globalTocReady = this.initMultiToc();
-    this.contextReady = this.initContext(exportId);
+    this.contextReady = this.initContext(pluginId);
   }
 
   initMultiToc(): Promise<MultiToc> {
@@ -34,55 +36,64 @@ export class EdcClient {
       .then((multiToc: MultiToc) => this.globalToc = multiToc);
   }
 
-  initContext(exportId?: string): Promise<any> {
+  initContext(pluginId?: string): Promise<any> {
     return this.globalTocReady
-      .then(() => this.getContext())
+      .then(() => this.getContext(pluginId))
       .then(context => {
-        this.setCurrentExport(exportId);
         return this.context = context;
       });
   }
 
-  setCurrentExport(newExportId: string): void {
-    this.currentExportId = this.checkExportId(newExportId);
-  }
-
   /**
-   * get the toc for a given export from its exportId
+   * get the toc for the given export
    * if exportId is not defined return the toc for the current export
-   * @param {string} targetExport the identifier of the export
+   * @param {string} targetPluginId the identifier of the export
    * @return {Promise<Toc>} the toc of the export
    */
-  getToc(targetExport?: string): Promise<Toc> {
+  getToc(targetPluginId?: string): Promise<Toc> {
     return this.globalTocReady.then((tocs: MultiToc) => {
-      const exportId = this.checkExportId(targetExport);
-      return get<Toc>(edcClientService.findExportById(tocs.exports, exportId), 'toc');
+      const pluginId = this.checkPluginId(targetPluginId);
+      return get<Toc>(edcClientService.findExportById(tocs.exports, pluginId), 'toc');
     });
   }
 
-  getInfo(targetExport?: string): Promise<any> {
-    return this.getHelpContent(targetExport, ContentTypeSuffix.TYPE_INFO_SUFFIX);
+  /**
+   * return the info content from the export "info" file
+   * @param {string} pluginId
+   * @return {Promise<any>}
+   */
+  getInfo(pluginId?: string): Promise<Info> {
+    return this.getHelpContent(pluginId, ContentTypeSuffix.TYPE_INFO_SUFFIX);
   }
 
-  getContext(targetExport?: string): Promise<any> {
-    return this.getHelpContent(targetExport, ContentTypeSuffix.TYPE_CONTEXT_SUFFIX);
+  /**
+   * return the contextual Help from the export "context" file
+   * if the pluginId defining the export is not defined, use current export or the export by default
+   * @param {string} pluginId the identifier of the plugin associated with the export
+   * @return {Promise<any>} the
+   */
+  getContext(pluginId?: string): Promise<any> {
+    // set the current export before requesting help content to make sure we hit the right context
+    this.setCurrentPluginId(pluginId);
+    return this.getHelpContent(pluginId, ContentTypeSuffix.TYPE_CONTEXT_SUFFIX);
   }
 
   getHelpContent(targetExport: string, suffix: ContentTypeSuffix): Promise<any> {
-    if (isNil(this.currentExportId)) {
+    if (isNil(this.currentPluginId)) {
       return this.globalTocReady.then(() => {
-        const exportId = this.checkExportId(targetExport);
+        const exportId = this.checkPluginId(targetExport);
         return edcClientService.getHelpContent(`${this.baseURL}/${exportId}`, suffix);
       });
     }
-    return edcClientService.getHelpContent(`${this.baseURL}/${this.currentExportId}`, suffix);
+    return edcClientService.getHelpContent(`${this.baseURL}/${this.currentPluginId}`, suffix);
   }
 
-  getHelper(key: string, subKey: string, lang: string = 'en'): Promise<Helper> {
+  getHelper(key: string, subKey: string, pluginId: string, lang = 'en'): Promise<Helper> {
     let helper: Helper;
     let deferred: Promise<any> = this.contextReady;
-    if (!deferred) {
-      deferred = this.initContext();
+    if (!deferred || (pluginId && this.currentPluginId !== pluginId)) {
+      // if context is not ready or we're trying to reach another product content, reinitialize context with the new plugin Id
+      deferred = this.initContext(pluginId);
     }
     return deferred
       .then(() => {
@@ -92,7 +103,7 @@ export class EdcClient {
             [ edcClientService.getContent<Helper>(this.baseURL, helper), ...helper.articles.map(article => edcClientService.getContent<Article>(this.baseURL, article)) ]
           );
         } else {
-          return PromiseEs6.reject(undefined);
+          console.error(`Contextual help not found for the main key [${key}] and subKey [${subKey}]`);
         }
       })
       .then(() => helper);
@@ -104,11 +115,17 @@ export class EdcClient {
    * @param {number} id
    * @return {Promise<Documentation>}
    */
-  getDocumentation(id: number): Promise<Documentation> {
+  getDocumentation(id: number): Promise<DocumentationTransfer> {
     return this.globalTocReady.then(() => {
-      const doc = edcClientService.getDocumentationById(this.globalToc, id);
-      if (doc) {
-        return edcClientService.getContent<Documentation>(this.baseURL, doc);
+      const docFromId = edcClientService.getDocumentationById(this.globalToc, id);
+      if (docFromId) {
+        return edcClientService.getContent<Documentation>(this.baseURL, docFromId).then((doc => {
+          const exportId = getPluginIdFromDocumentId(this.globalToc, id);
+          const hasExportChanged = this.isPluginIdNew(exportId);
+          this.setCurrentPluginId(exportId);
+          doc.exportId = this.currentPluginId;
+          return new DocumentationTransfer(doc, hasExportChanged);
+        }));
       } else {
         console.error(`Documentation [${id}] not found in table of content`);
       }
@@ -123,29 +140,41 @@ export class EdcClient {
     });
   }
 
+  getPluginId(): string {
+    return this.getCurrentPluginId();
+  }
+
   getKey(key: string, subKey: string, lang: string): Helper {
     return get<Helper>(this.context, `['${key}']['${subKey}']['${lang}']`);
   }
 
-  checkExportId(exportId: string): string {
-    if (this.isExportPresent(exportId)) {
-      return exportId;
+  getCurrentPluginId(): string {
+    if (!isNil(this.currentPluginId)) {
+      return this.currentPluginId;
     }
-    return this.getCurrentExportId();
+    return get<string>(this.globalToc, 'exports[0].pluginId');
   }
 
-  isExportPresent(exportId: string): boolean {
+  setCurrentPluginId(newPluginId: string): void {
+    this.currentPluginId = this.checkPluginId(newPluginId);
+  }
+
+  checkPluginId(pluginId: string): string {
+    if (this.isPluginIdNew(pluginId) && this.isPluginIdPresent(pluginId)) {
+      return pluginId;
+    }
+    return this.getCurrentPluginId();
+  }
+
+  isPluginIdPresent(pluginId: string): boolean {
     if (!this.globalToc || isEmpty(this.globalToc.exports)) {
       return false;
     }
-    return !isNil(exportId) && some(this.globalToc.exports, (docExport: DocumentationExport) => docExport.pluginId === exportId);
+    return !isNil(pluginId) && some(this.globalToc.exports, (docExport: DocumentationExport) => docExport.pluginId === pluginId);
   }
 
-  getCurrentExportId(): string {
-    if (!isNil(this.currentExportId)) {
-      return this.currentExportId;
-    }
-    return get<string>(this.globalToc, 'exports[0].pluginId');
+  isPluginIdNew(newPluginId: string): boolean {
+    return newPluginId && this.currentPluginId !== newPluginId;
   }
 
 }

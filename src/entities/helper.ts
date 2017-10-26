@@ -4,6 +4,7 @@ import { Link } from './link';
 import { Linkable } from './linkable';
 
 export class Helper implements Loadable, Linkable {
+  exportId: string;
   label: string;
   description: string;
   url: string;
