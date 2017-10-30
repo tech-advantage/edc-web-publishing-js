@@ -103,7 +103,7 @@ export class EdcClient {
             [ edcClientService.getContent<Helper>(this.baseURL, helper), ...helper.articles.map(article => edcClientService.getContent<Article>(this.baseURL, article)) ]
           );
         } else {
-          console.error(`Contextual help not found for the main key [${key}] and subKey [${subKey}]`);
+          console.warn(`Contextual help not found for the main key [${key}] and subKey [${subKey}]`);
         }
       })
       .then(() => helper);
@@ -127,7 +127,7 @@ export class EdcClient {
           return new DocumentationTransfer(doc, hasExportChanged);
         }));
       } else {
-        console.error(`Documentation [${id}] not found in table of content`);
+        console.warn(`Documentation [${id}] not found in table of content`);
       }
     });
   }
