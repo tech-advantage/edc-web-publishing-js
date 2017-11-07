@@ -1,4 +1,4 @@
-import { reduce, assign } from 'lodash';
+import { chain, reduce, assign } from 'lodash';
 import { Documentation } from '../entities/documentation';
 import { Indexable } from '../entities/indexable';
 
@@ -28,5 +28,19 @@ export class Utils {
       // recall the function upon topics until finding the leaf
       return assign(memo, this.indexTree(topics, newPrefix));
     }, {});
+  }
+
+  static checkMultiDocContent(content: any): boolean {
+    if (typeof content === 'string') {
+      return false;
+    }
+    return Utils.isMultiTocContentValid(content);
+  }
+
+  static isMultiTocContentValid(exportsContent: any[]): boolean {
+    return !chain(exportsContent)
+      .map(exportContent => exportContent.pluginId)
+      .isEmpty()
+      .valueOf();
   }
 }

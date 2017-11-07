@@ -39,8 +39,9 @@ export class EdcClient {
   initContext(pluginId?: string): Promise<any> {
     return this.globalTocReady
       .then(() => this.getContext(pluginId))
-      .then(context => {
-        return this.context = context;
+      .then(context => this.context = context)
+      .catch(err => {
+        console.warn(`Edc-client-js : could not get context from plugin [${this.currentPluginId}]`);
       });
   }
 
@@ -53,7 +54,9 @@ export class EdcClient {
   getToc(targetPluginId?: string): Promise<Toc> {
     return this.globalTocReady.then((tocs: MultiToc) => {
       const pluginId = this.checkPluginId(targetPluginId);
-      return get<Toc>(edcClientService.findExportById(tocs.exports, pluginId), 'toc');
+      if (pluginId) {
+        return get<Toc>(edcClientService.findExportById(tocs.exports, pluginId), 'toc');
+      }
     });
   }
 
@@ -82,13 +85,24 @@ export class EdcClient {
     if (isNil(this.currentPluginId)) {
       return this.globalTocReady.then(() => {
         const exportId = this.checkPluginId(targetExport);
-        return edcClientService.getHelpContent(`${this.baseURL}/${exportId}`, suffix);
+        if (exportId) {
+          return edcClientService.getHelpContent(`${this.baseURL}/${exportId}`, suffix);
+        }
       });
     }
     return edcClientService.getHelpContent(`${this.baseURL}/${this.currentPluginId}`, suffix);
   }
 
-  getHelper(key: string, subKey: string, pluginId: string, lang = 'en'): Promise<Helper> {
+  /**
+   * return contextual help content
+   * if pluginId is not defined, it will try and find the content in the current plugin Id export
+   * @param {string} mainKey the main key of the requested contextual help element
+   * @param {string} subKey the secondary key of the requested contextual help element
+   * @param {string} pluginId the pluginId defining the export the contextual help element belongs to
+   * @param {string} lang the identifier of the used lang
+   * @return {Promise<Helper>} a promise containing the contextual help content
+   */
+  getHelper(mainKey: string, subKey: string, pluginId: string, lang = 'en'): Promise<Helper> {
     let helper: Helper;
     let deferred: Promise<any> = this.contextReady;
     if (!deferred || (pluginId && this.currentPluginId !== pluginId)) {
@@ -97,13 +111,13 @@ export class EdcClient {
     }
     return deferred
       .then(() => {
-        helper = this.getKey(key, subKey, lang);
+        helper = this.getKey(mainKey, subKey, lang);
         if (helper) {
           return PromiseEs6.all(
             [ edcClientService.getContent<Helper>(this.baseURL, helper), ...helper.articles.map(article => edcClientService.getContent<Article>(this.baseURL, article)) ]
           );
         } else {
-          console.warn(`Contextual help not found for the main key [${key}] and subKey [${subKey}]`);
+          console.warn(`Edc-client-js : Contextual help not found for the main key [${mainKey}] and subKey [${subKey}]`);
         }
       })
       .then(() => helper);
@@ -111,9 +125,9 @@ export class EdcClient {
 
   /**
    * get the documentation from its id
-   * will set the current export to that of the requested documentation
-   * @param {number} id
-   * @return {Promise<Documentation>}
+   * and set the requested documentation's export as the current one
+   * @param {number} id the identifier of the documentation
+   * @return {Promise<Documentation>} an object containing the requested doc and a boolean true if export's context has changed
    */
   getDocumentation(id: number): Promise<DocumentationTransfer> {
     return this.globalTocReady.then(() => {
@@ -127,7 +141,7 @@ export class EdcClient {
           return new DocumentationTransfer(doc, hasExportChanged);
         }));
       } else {
-        console.warn(`Documentation [${id}] not found in table of content`);
+        console.warn(`Edc-client-js : Documentation [${id}] not found in table of content`);
       }
     });
   }
