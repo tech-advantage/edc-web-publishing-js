@@ -1,4 +1,4 @@
-import { get, isEmpty, isNil, join, some, split } from 'lodash';
+import { first, get, isEmpty, join, some, split } from 'lodash';
 import { Helper } from './entities/helper';
 import { Toc } from './entities/toc';
 import { MultiToc } from './entities/multi-toc';
@@ -6,10 +6,8 @@ import { Documentation } from './entities/documentation';
 import { InformationMap } from './entities/information-map';
 import { Promise as PromiseEs6 } from 'es6-promise';
 import { Article } from './entities/article';
-import { DocumentationExport } from './entities/documentation-export';
 import * as edcClientService from './edc-client-service';
 import { ContentTypeSuffix } from './entities/content-type';
-import { getPluginIdFromDocumentId } from './edc-client-service';
 import { DocumentationTransfer } from './entities/documentation-transfer';
 import { Info } from './entities/info';
 
@@ -21,28 +19,29 @@ export class EdcClient {
   globalTocReady: Promise<MultiToc>;
   baseURL: string;
 
-  constructor(baseURL?: string, exportId?: string) {
+  constructor(baseURL?: string, exportId?: string, contextOnly?: boolean) {
     this.baseURL = baseURL;
-    this.init(exportId);
+    this.init(exportId, contextOnly);
   }
 
-  init(pluginId?: string) {
-    this.globalTocReady = this.initMultiToc();
+  init(pluginId?: string, contextOnly?: boolean) {
     this.contextReady = this.initContext(pluginId);
+    if (!contextOnly) {
+      this.globalTocReady = this.initMultiToc();
+    }
+  }
+
+  initContext(pluginId?: string): Promise<any> {
+    return this.getContext(pluginId)
+      .then(context => this.context = context)
+      .catch(err => {
+        console.warn(`Edc-client-js : could not get context from plugin [${this.currentPluginId}]: ${err}`);
+      });
   }
 
   initMultiToc(): Promise<MultiToc> {
     return edcClientService.createMultiToc(this.baseURL)
       .then((multiToc: MultiToc) => this.globalToc = multiToc);
-  }
-
-  initContext(pluginId?: string): Promise<any> {
-    return this.globalTocReady
-      .then(() => this.getContext(pluginId))
-      .then(context => this.context = context)
-      .catch(err => {
-        console.warn(`Edc-client-js : could not get context from plugin [${this.currentPluginId}]`);
-      });
   }
 
   /**
@@ -53,7 +52,7 @@ export class EdcClient {
    */
   getToc(targetPluginId?: string): Promise<Toc> {
     return this.globalTocReady.then((tocs: MultiToc) => {
-      const pluginId = this.checkPluginId(targetPluginId);
+      const pluginId = targetPluginId || this.currentPluginId;
       if (pluginId) {
         return get<Toc>(edcClientService.findExportById(tocs.exports, pluginId), 'toc');
       }
@@ -77,18 +76,13 @@ export class EdcClient {
    */
   getContext(pluginId?: string): Promise<any> {
     // set the current export before requesting help content to make sure we hit the right context
-    this.setCurrentPluginId(pluginId);
     return this.getHelpContent(pluginId, ContentTypeSuffix.TYPE_CONTEXT_SUFFIX);
   }
 
   getHelpContent(targetExport: string, suffix: ContentTypeSuffix): Promise<any> {
-    if (isNil(this.currentPluginId)) {
-      return this.globalTocReady.then(() => {
-        const exportId = this.checkPluginId(targetExport);
-        if (exportId) {
-          return edcClientService.getHelpContent(`${this.baseURL}/${exportId}`, suffix);
-        }
-      });
+    if (this.isPluginIdNew(targetExport)) {
+      return this.initPluginId(targetExport)
+        .then(exportId =>  edcClientService.getHelpContent(`${this.baseURL}/${exportId}`, suffix));
     }
     return edcClientService.getHelpContent(`${this.baseURL}/${this.currentPluginId}`, suffix);
   }
@@ -105,8 +99,8 @@ export class EdcClient {
   getHelper(mainKey: string, subKey: string, pluginId: string, lang = 'en'): Promise<Helper> {
     let helper: Helper;
     let deferred: Promise<any> = this.contextReady;
-    if (!deferred || (pluginId && this.currentPluginId !== pluginId)) {
-      // if context is not ready or we're trying to reach another product content, reinitialize context with the new plugin Id
+    if (!deferred || this.isPluginIdNew(pluginId)) {
+      // if context is not ready or we're trying to reach another product content, initialize context with the new plugin Id
       deferred = this.initContext(pluginId);
     }
     return deferred
@@ -114,17 +108,16 @@ export class EdcClient {
         helper = this.getKey(mainKey, subKey, lang);
         if (helper) {
           return PromiseEs6.all(
-            [ edcClientService.getContent<Helper>(this.baseURL, helper), ...helper.articles.map(article => edcClientService.getContent<Article>(this.baseURL, article)) ]
+            [ edcClientService.getContent<Helper>(this.baseURL, helper),
+              ...helper.articles.map(article => edcClientService.getContent<Article>(this.baseURL, article)) ]
           );
-        } else {
-          console.warn(`Edc-client-js : Contextual help not found for the main key [${mainKey}] and subKey [${subKey}]`);
         }
       })
       .then(() => helper);
   }
 
   /**
-   * get the documentation from its id
+   * return the documentation from its id
    * and set the requested documentation's export as the current one
    * @param {number} id the identifier of the documentation
    * @return {Promise<Documentation>} an object containing the requested doc and a boolean true if export's context has changed
@@ -134,7 +127,7 @@ export class EdcClient {
       const docFromId = edcClientService.getDocumentationById(this.globalToc, id);
       if (docFromId) {
         return edcClientService.getContent<Documentation>(this.baseURL, docFromId).then((doc => {
-          const exportId = getPluginIdFromDocumentId(this.globalToc, id);
+          const exportId = edcClientService.getPluginIdFromDocumentId(this.globalToc, id);
           const hasExportChanged = this.isPluginIdNew(exportId);
           this.setCurrentPluginId(exportId);
           doc.exportId = this.currentPluginId;
@@ -154,41 +147,31 @@ export class EdcClient {
     });
   }
 
-  getPluginId(): string {
-    return this.getCurrentPluginId();
-  }
-
   getKey(key: string, subKey: string, lang: string): Helper {
     return get<Helper>(this.context, `['${key}']['${subKey}']['${lang}']`);
   }
 
-  getCurrentPluginId(): string {
-    if (!isNil(this.currentPluginId)) {
-      return this.currentPluginId;
-    }
-    return get<string>(this.globalToc, 'exports[0].pluginId');
-  }
-
   setCurrentPluginId(newPluginId: string): void {
-    this.currentPluginId = this.checkPluginId(newPluginId);
+    this.currentPluginId = newPluginId;
   }
 
-  checkPluginId(pluginId: string): string {
-    if (this.isPluginIdNew(pluginId) && this.isPluginIdPresent(pluginId)) {
-      return pluginId;
-    }
-    return this.getCurrentPluginId();
-  }
+  initPluginId(pluginId: string): Promise<any> {
+    return edcClientService.getPluginIds(this.baseURL)
+      .then((pluginIds: string[]) => {
+        if (isEmpty(pluginIds)) {
+          throw new Error(`Could not init plugin : no available plugins`);
+        }
+        if (!isEmpty(pluginId) && !some(pluginIds, id => id === pluginId)) {
+          throw new Error(`Could not init plugin : No plugin was found with id "${pluginId}"`);
+        }
 
-  isPluginIdPresent(pluginId: string): boolean {
-    if (!this.globalToc || isEmpty(this.globalToc.exports)) {
-      return false;
-    }
-    return !isNil(pluginId) && some(this.globalToc.exports, (docExport: DocumentationExport) => docExport.pluginId === pluginId);
+        this.currentPluginId = pluginId || first(pluginIds);
+        return this.currentPluginId;
+      });
   }
 
   isPluginIdNew(newPluginId: string): boolean {
-    return newPluginId && this.currentPluginId !== newPluginId;
+    return isEmpty(this.currentPluginId) || (newPluginId && this.currentPluginId !== newPluginId);
   }
 
 }

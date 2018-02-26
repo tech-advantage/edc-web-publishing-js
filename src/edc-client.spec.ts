@@ -45,6 +45,7 @@ describe('EDC client', () => {
     beforeEach(() => {
       spyOn(edcClientService, 'createMultiToc').and.returnValue(Promise.resolve(globalToc));
       spyOn(edcClientService, 'getHelpContent').and.returnValue(Promise.resolve(context));
+      spyOn(edcClientService, 'getPluginIds').and.returnValue(Promise.resolve(['myExportId1', 'myExportId2']));
     });
 
     it('should init edc client', async(() => {
@@ -71,11 +72,28 @@ describe('EDC client', () => {
       return Promise.all([ edcClient.contextReady, edcClient.globalTocReady ]).then(() => {
 
         expect(edcClientService.createMultiToc).toHaveBeenCalledWith(baseURL);
+        expect(edcClientService.getPluginIds).toHaveBeenCalledWith(baseURL);
         expect(edcClient.globalToc).toEqual(globalToc);
         expect(edcClient.context).toEqual(context);
         expect(edcClient.baseURL).toEqual(baseURL);
         expect(edcClient.currentPluginId).toEqual('myExportId2');
-        expect(edcClient.globalToc).toEqual(globalToc);
+
+        expect(edcClientService.getHelpContent).toHaveBeenCalledWith('http://base.url:8080/help/myExportId2', ContentTypeSuffix.TYPE_CONTEXT_SUFFIX);
+      });
+    }));
+
+    it('should init contextual help only if boolean is true', async(() => {
+      const baseURL = 'http://base.url:8080/help';
+      edcClient = new EdcClient(baseURL, 'myExportId2', true);
+
+      return Promise.all([ edcClient.contextReady, edcClient.globalTocReady ]).then(() => {
+
+        expect(edcClientService.createMultiToc).toHaveBeenCalledTimes(0);
+        expect(edcClientService.getPluginIds).toHaveBeenCalledWith(baseURL);
+        expect(edcClient.globalToc).toBeUndefined();
+        expect(edcClient.context).toEqual(context);
+        expect(edcClient.baseURL).toEqual(baseURL);
+        expect(edcClient.currentPluginId).toEqual('myExportId2');
 
         expect(edcClientService.getHelpContent).toHaveBeenCalledWith('http://base.url:8080/help/myExportId2', ContentTypeSuffix.TYPE_CONTEXT_SUFFIX);
       });

@@ -22,6 +22,11 @@ export function createMultiToc(baseURL: string): Promise<MultiToc> {
     });
 }
 
+export function getPluginIds(baseURL: string): Promise<string[]> {
+  return getHelpContent(baseURL, ContentTypeSuffix.TYPE_MULTI_TOC_SUFFIX)
+    .then((exports: DocumentationExport[]) => map(exports, exp => exp.pluginId));
+}
+
 export function getHelpContent(baseUrl: string, suffix: ContentTypeSuffix): Promise<any> {
   return axios.get(`${baseUrl}${suffix}`)
     .then((res: AxiosResponse) => get<number>(res, 'status') === 200 ? res.data : null,
@@ -86,9 +91,9 @@ export function addTocIMsToIndex(baseUrl: string, sourceExport: DocumentationExp
   return getHelpContent(rootUrl, ContentTypeSuffix.TYPE_TOC_SUFFIX)
     .then((currentToc: Toc) => addExportToGlobalToc(rootUrl, currentToc, sourceExport, multiToc),
       (err) => {
-      console.warn(`Edc-client-js : could not read toc.json file from plugin [${pluginId}] ${err}`);
-      return null;
-    });
+        console.warn(`Edc-client-js : could not read toc.json file from plugin [${pluginId}] ${err}`);
+        return null;
+      });
 }
 
 /**
@@ -107,7 +112,7 @@ function addExportToGlobalToc(rootUrl: string, currentToc: Toc, sourceExport: Do
     return null;
   }
   return addInformationMapsToIndex(rootUrl, informationMaps, multiToc)
-      .then(() => addTocToExport(sourceExport, currentToc, multiToc));
+    .then(() => addTocToExport(sourceExport, currentToc, multiToc));
 }
 
 function addInformationMapsToIndex(rootUrl: string, informationMaps: InformationMap[], multiToc: MultiToc): PromiseEs6<void[]> {
