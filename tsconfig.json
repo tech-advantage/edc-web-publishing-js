@@ -1,8 +1,7 @@
 {
   "compilerOptions": {
-    "declaration": true,
-    "module": "commonjs",
-    "moduleResolution": "node",
+    "target": "es5",
+    "module": "es6",
     "noImplicitAny": true,
     "outDir": "./lib",
     "preserveConstEnums": true,
