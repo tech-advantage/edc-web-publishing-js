@@ -10,6 +10,7 @@ import * as edcClientService from './edc-client-service';
 import { ContentTypeSuffix } from './entities/content-type';
 import { DocumentationTransfer } from './entities/documentation-transfer';
 import { Info } from './entities/info';
+import { UrlUtil } from './utils/url-util';
 
 export class EdcClient {
   context: any;
@@ -18,9 +19,11 @@ export class EdcClient {
   contextReady: Promise<any>;
   globalTocReady: Promise<MultiToc>;
   baseURL: string;
+  urlUtil: UrlUtil;
 
-  constructor(baseURL?: string, exportId?: string, contextOnly?: boolean) {
+  constructor(baseURL?: string, helpURL?: string, exportId?: string, contextOnly?: boolean) {
     this.baseURL = baseURL;
+    this.urlUtil = new UrlUtil(helpURL);
     this.init(exportId, contextOnly);
   }
 
@@ -82,7 +85,7 @@ export class EdcClient {
   getHelpContent(targetExport: string, suffix: ContentTypeSuffix): Promise<any> {
     if (this.isPluginIdNew(targetExport)) {
       return this.initPluginId(targetExport)
-        .then(exportId =>  edcClientService.getHelpContent(`${this.baseURL}/${exportId}`, suffix));
+        .then(exportId => edcClientService.getHelpContent(`${this.baseURL}/${exportId}`, suffix));
     }
     return edcClientService.getHelpContent(`${this.baseURL}/${this.currentPluginId}`, suffix);
   }
@@ -108,8 +111,8 @@ export class EdcClient {
         helper = this.getKey(mainKey, subKey, lang);
         if (helper) {
           return PromiseEs6.all(
-            [ edcClientService.getContent<Helper>(this.baseURL, helper),
-              ...helper.articles.map(article => edcClientService.getContent<Article>(this.baseURL, article)) ]
+            [edcClientService.getContent<Helper>(this.baseURL, helper),
+            ...helper.articles.map(article => edcClientService.getContent<Article>(this.baseURL, article))]
           );
         }
       })
@@ -139,9 +142,44 @@ export class EdcClient {
     });
   }
 
+  /**
+   * Return the contextual web help url
+   * @param mainKey the main key
+   * @param subKey the sub key
+   * @param languageCode the language code
+   * @param articleIndex  the article index
+   * @param publicationId the publication identifier (optional, if not defined, use the default publication identifier)
+   */
+  getContextWebHelpUrl(mainKey: string, subKey: string, languageCode: string, articleIndex: number, publicationId?: string): string {
+    const pluginId = publicationId || this.currentPluginId;
+    return this.urlUtil.getContextUrl(pluginId, mainKey, subKey, languageCode, articleIndex);
+  }
+
+  /**
+   * Return the documentation web help url.
+   * @param id the documentation identifier
+   */
+  getDocumentationWebHelpUrl(id: number): string {
+    return this.urlUtil.getDocumentationUrl(id);
+  }
+
+  /**
+   * Return the home web help url
+   */
+  getHomeWebHelpUrl(): string {
+    return this.urlUtil.getHomeUrl();
+  }
+
+  /**
+   * Return the error web help url
+   */
+  getErrorWebHelpUrl(): string {
+    return this.urlUtil.getErrorUrl();
+  }
+
   getInformationMapFromDocId(id: number): Promise<InformationMap> {
     return this.globalTocReady.then(() => {
-      const docPath = this.globalToc.index[ id ];
+      const docPath = this.globalToc.index[id];
       const iMPath = join(split(docPath, '.', 3), '.');
       return get<InformationMap>(this.globalToc, iMPath);
     });
