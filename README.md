@@ -6,9 +6,13 @@ management.
 
 Learn more at [https://www.easydoccontents.com](https://www.easydoccontents.com).
 
+## edc Version Compatibility
+
+Current edc release (v2.2) uses edc-client-js v2.0.2
+
 ## Note
 
-If you have an Angular, application you can use our **edc help angular component** available here :
+If you have an Angular application, you can use our **edc help angular component** available here :
 
 https://github.com/tech-advantage/edc-popover-ng
 
