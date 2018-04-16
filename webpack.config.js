@@ -5,7 +5,7 @@ const tsLoader = require.resolve('ts-loader');
 
 module.exports = {
   cache: true,
-  entry: './src/edc-client.ts',
+  entry: './index.ts',
   module: {
     loaders: [
       {
@@ -33,8 +33,9 @@ module.exports = {
     extensions: [ '.tsx', '.ts', '.js', '!**/*.spec.ts', '!src/lib/**/*.ts' ]
   },
   output: {
-    path: path.resolve(__dirname, './dist'),
-    filename: 'edc-client.js',
+    path: path.resolve(__dirname, 'dist'),
+    filename: 'index.js',
+	publicPath: '/',
     library: 'edc-client-js',
     libraryTarget: "umd"
   },
