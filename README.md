@@ -8,7 +8,7 @@ Learn more at [https://www.easydoccontents.com](https://www.easydoccontents.com)
 
 ## edc Version Compatibility
 
-Current edc release (v2.2) uses edc-client-js v2.0.2
+edc current release (v2.3+) uses edc-client-js v2.0.2
 
 ## Note
 
