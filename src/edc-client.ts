@@ -57,7 +57,7 @@ export class EdcClient {
     return this.globalTocReady.then((tocs: MultiToc) => {
       const pluginId = targetPluginId || this.currentPluginId;
       if (pluginId) {
-        return get<Toc>(edcClientService.findExportById(tocs.exports, pluginId), 'toc');
+        return get(edcClientService.findExportById(tocs.exports, pluginId), 'toc') as Toc;
       }
     });
   }
@@ -112,7 +112,7 @@ export class EdcClient {
         if (helper) {
           return PromiseEs6.all(
             [edcClientService.getContent<Helper>(this.baseURL, helper),
-            ...helper.articles.map(article => edcClientService.getContent<Article>(this.baseURL, article))]
+              ...helper.articles.map(article => edcClientService.getContent<Article>(this.baseURL, article))]
           );
         }
       })
@@ -181,12 +181,12 @@ export class EdcClient {
     return this.globalTocReady.then(() => {
       const docPath = this.globalToc.index[id];
       const iMPath = join(split(docPath, '.', 3), '.');
-      return get<InformationMap>(this.globalToc, iMPath);
+      return get(this.globalToc, iMPath) as InformationMap;
     });
   }
 
   getKey(key: string, subKey: string, lang: string): Helper {
-    return get<Helper>(this.context, `['${key}']['${subKey}']['${lang}']`);
+    return get(this.context, `['${key}']['${subKey}']['${lang}']`);
   }
 
   setCurrentPluginId(newPluginId: string): void {

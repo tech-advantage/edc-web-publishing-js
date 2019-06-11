@@ -14,7 +14,6 @@ typings/
 
 
 # compiled output
-/dist
 /.yarn-cache
 /tmp
 
