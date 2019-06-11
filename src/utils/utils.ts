@@ -14,7 +14,7 @@ export class Utils {
    */
   static indexTree(indexables: Indexable[], prefix?: string, isRoot?: boolean): Map<string, string> {
     // iterate through topics and reduce the documentations concatenating the path with parents
-    return reduce(indexables, (memo: any, {id, topics}: Documentation, index: number) => {
+    const tree = reduce(indexables, (memo: any, {id, topics}: Documentation, index: number) => {
       let newPrefix: string;
       // if it's not the root, append the prefix with keyword topics
       if (!isRoot) {
@@ -28,6 +28,7 @@ export class Utils {
       // recall the function upon topics until finding the leaf
       return assign(memo, this.indexTree(topics, newPrefix));
     }, {});
+    return tree;
   }
 
   static checkMultiDocContent(content: any): boolean {
@@ -38,9 +39,10 @@ export class Utils {
   }
 
   static isMultiTocContentValid(exportsContent: any[]): boolean {
-    return !chain(exportsContent)
+    const result = !chain(exportsContent)
       .map(exportContent => exportContent.pluginId)
       .isEmpty()
       .valueOf();
+    return result;
   }
 }

@@ -29,13 +29,13 @@ export function getPluginIds(baseURL: string): Promise<string[]> {
 
 export function getHelpContent(baseUrl: string, suffix: ContentTypeSuffix): Promise<any> {
   return axios.get(`${baseUrl}${suffix}`)
-    .then((res: AxiosResponse) => get<number>(res, 'status') === 200 ? res.data : null,
+    .then((res: AxiosResponse) => get(res, 'status') === 200 ? res.data : null,
       (err: AxiosError) => PromiseEs6.reject(err));
 }
 
 export function getDocumentationById(globalToc: MultiToc, id: number): Documentation {
   const path = get(globalToc, `index[${id}]`);
-  return get<Documentation>(globalToc, path);
+  return get(globalToc, path);
 }
 
 export function getContent<T extends Loadable>(baseURL: string, item: T): Promise<T> {
@@ -60,7 +60,7 @@ export function createExportsFromContent(exportsContent: DocumentationExport[]):
 }
 
 export function createExportFromContent(exportContent: DocumentationExport): DocumentationExport {
-  return assign<DocumentationExport>(exportContent, { toc: new Toc() });
+  return assign(exportContent, { toc: new Toc() });
 }
 
 export function findExportById(exports: DocumentationExport[], id: string): DocumentationExport {
@@ -68,9 +68,9 @@ export function findExportById(exports: DocumentationExport[], id: string): Docu
 }
 
 export function getPluginIdFromDocumentId(globalToc: MultiToc, docId: number): string {
-  const docPath = get<string>(globalToc, `index[${docId}]`);
+  const docPath = get(globalToc, `index[${docId}]`) as string;
   const exportPath = first(split(docPath, '.'));
-  return get<string>(globalToc, `${exportPath}.pluginId`);
+  return get(globalToc, `${exportPath}.pluginId`);
 }
 
 export function initEachToc(baseURL: string, exports: DocumentationExport[], multiToc: MultiToc): any {
@@ -81,7 +81,7 @@ export function initEachToc(baseURL: string, exports: DocumentationExport[], mul
 }
 
 export function addTocIMsToIndex(baseUrl: string, sourceExport: DocumentationExport, multiToc: MultiToc): Promise<DocumentationExport> {
-  const pluginId = get<string>(sourceExport, 'pluginId');
+  const pluginId = get(sourceExport, 'pluginId');
   if (!pluginId) {
     return null;
   }
@@ -107,7 +107,7 @@ export function addTocIMsToIndex(baseUrl: string, sourceExport: DocumentationExp
  * @return {Promise<DocumentationExport>} returns a promise containing the current export
  */
 function addExportToGlobalToc(rootUrl: string, currentToc: Toc, sourceExport: DocumentationExport, multiToc: MultiToc): PromiseEs6<DocumentationExport> {
-  const informationMaps = get<InformationMap[]>(currentToc, 'toc');
+  const informationMaps: InformationMap[] = get(currentToc, 'toc');
   if (!informationMaps) {
     return null;
   }
@@ -115,7 +115,7 @@ function addExportToGlobalToc(rootUrl: string, currentToc: Toc, sourceExport: Do
     .then(() => addTocToExport(sourceExport, currentToc, multiToc));
 }
 
-function addInformationMapsToIndex(rootUrl: string, informationMaps: InformationMap[], multiToc: MultiToc): PromiseEs6<void[]> {
+function addInformationMapsToIndex(rootUrl: string, informationMaps: InformationMap[], multiToc: MultiToc): PromiseEs6<any> {
   return PromiseEs6.all(map(informationMaps, (informationMap, key) => getHelpContent(`${rootUrl}/${informationMap.file}`, ContentTypeSuffix.TYPE_EMPTY_SUFFIX)
     .then((content: InformationMap) => addSingleIMContentToIndex(informationMap, content, key, multiToc))));
 }
