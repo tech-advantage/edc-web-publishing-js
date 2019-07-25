@@ -1,7 +1,7 @@
 import { UrlUtil } from './url-util';
 
 describe('url util', () => {
-    const urlUtil = new UrlUtil('http://localhost:8080/help');
+    const urlUtil = new UrlUtil('http://localhost:8080', 'http://localhost:8080/help');
     it('should return the documentation url', () => {
         expect(urlUtil.getDocumentationUrl(12)).toEqual('http://localhost:8080/help/doc/12');
     });

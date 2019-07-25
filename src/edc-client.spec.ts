@@ -57,7 +57,7 @@ describe('EDC client', () => {
         expect(edcClientService.createMultiToc).toHaveBeenCalledWith(baseURL);
         expect(edcClient.globalToc).toEqual(globalToc);
         expect(edcClient.context).toEqual(context);
-        expect(edcClient.baseURL).toEqual(baseURL);
+        expect(edcClient.urlUtil.getBaseUrl()).toEqual(baseURL);
         expect(edcClient.currentPluginId).toEqual('myExportId1');
         expect(edcClient.globalToc).toEqual(globalToc);
 
@@ -76,7 +76,7 @@ describe('EDC client', () => {
         expect(edcClientService.getPluginIds).toHaveBeenCalledWith(baseURL);
         expect(edcClient.globalToc).toEqual(globalToc);
         expect(edcClient.context).toEqual(context);
-        expect(edcClient.baseURL).toEqual(baseURL);
+        expect(edcClient.urlUtil.getBaseUrl()).toEqual(baseURL);
         expect(edcClient.currentPluginId).toEqual('myExportId2');
 
         expect(edcClientService.getHelpContent).toHaveBeenCalledWith('http://base.url:8080/doc/myExportId2', ContentTypeSuffix.TYPE_CONTEXT_SUFFIX);
@@ -94,7 +94,7 @@ describe('EDC client', () => {
         expect(edcClientService.getPluginIds).toHaveBeenCalledWith(baseURL);
         expect(edcClient.globalToc).toBeUndefined();
         expect(edcClient.context).toEqual(context);
-        expect(edcClient.baseURL).toEqual(baseURL);
+        expect(edcClient.urlUtil.getBaseUrl()).toEqual(baseURL);
         expect(edcClient.currentPluginId).toEqual('myExportId2');
 
         expect(edcClientService.getHelpContent).toHaveBeenCalledWith('http://base.url:8080/doc/myExportId2', ContentTypeSuffix.TYPE_CONTEXT_SUFFIX);

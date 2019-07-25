@@ -11,6 +11,7 @@ import { ContentTypeSuffix } from './entities/content-type';
 import { DocumentationTransfer } from './entities/documentation-transfer';
 import { Info } from './entities/info';
 import { UrlUtil } from './utils/url-util';
+import { LanguageService } from './language-service';
 
 export class EdcClient {
   context: any;
@@ -18,12 +19,11 @@ export class EdcClient {
   currentPluginId: string;
   contextReady: Promise<any>;
   globalTocReady: Promise<MultiToc>;
-  baseURL: string;
   urlUtil: UrlUtil;
+  languageService: LanguageService = new LanguageService();
 
-  constructor(baseURL?: string, helpURL?: string, exportId?: string, contextOnly?: boolean) {
-    this.baseURL = baseURL;
-    this.urlUtil = new UrlUtil(helpURL);
+  constructor(baseURL?: string, helpURL?: string, exportId?: string, contextOnly?: boolean, i18nUrl?: string) {
+    this.urlUtil = new UrlUtil(baseURL, helpURL, i18nUrl);
     this.init(exportId, contextOnly);
   }
 
@@ -32,6 +32,7 @@ export class EdcClient {
     if (!contextOnly) {
       this.globalTocReady = this.initMultiToc();
     }
+    this.initLanguages(pluginId);
   }
 
   initContext(pluginId?: string): Promise<any> {
@@ -43,8 +44,14 @@ export class EdcClient {
   }
 
   initMultiToc(): Promise<MultiToc> {
-    return edcClientService.createMultiToc(this.baseURL)
+    return edcClientService.createMultiToc(this.urlUtil.getBaseUrl())
       .then((multiToc: MultiToc) => this.globalToc = multiToc);
+  }
+
+  initLanguages(pluginId?: string): void {
+    this.getInfo(pluginId).then((info: Info) => {
+      this.languageService = new LanguageService(info.languageId);
+    });
   }
 
   /**
@@ -85,9 +92,9 @@ export class EdcClient {
   getHelpContent(targetExport: string, suffix: ContentTypeSuffix): Promise<any> {
     if (this.isPluginIdNew(targetExport)) {
       return this.initPluginId(targetExport)
-        .then(exportId => edcClientService.getHelpContent(`${this.baseURL}/${exportId}`, suffix));
+        .then(exportId => edcClientService.getHelpContent(`${this.urlUtil.getBaseUrl()}/${exportId}`, suffix));
     }
-    return edcClientService.getHelpContent(`${this.baseURL}/${this.currentPluginId}`, suffix);
+    return edcClientService.getHelpContent(`${this.urlUtil.getBaseUrl()}/${this.currentPluginId}`, suffix);
   }
 
   /**
@@ -111,8 +118,8 @@ export class EdcClient {
         helper = this.getKey(mainKey, subKey, lang);
         if (helper) {
           return PromiseEs6.all(
-            [edcClientService.getContent<Helper>(this.baseURL, helper),
-              ...helper.articles.map(article => edcClientService.getContent<Article>(this.baseURL, article))]
+            [edcClientService.getContent<Helper>(this.urlUtil.getBaseUrl(), helper),
+              ...helper.articles.map(article => edcClientService.getContent<Article>(this.urlUtil.getBaseUrl(), article))]
           );
         }
       })
@@ -129,7 +136,7 @@ export class EdcClient {
     return this.globalTocReady.then(() => {
       const docFromId = edcClientService.getDocumentationById(this.globalToc, id);
       if (docFromId) {
-        return edcClientService.getContent<Documentation>(this.baseURL, docFromId).then((doc => {
+        return edcClientService.getContent<Documentation>(this.urlUtil.getBaseUrl(), docFromId).then((doc => {
           const exportId = edcClientService.getPluginIdFromDocumentId(this.globalToc, id);
           const hasExportChanged = this.isPluginIdNew(exportId);
           this.setCurrentPluginId(exportId);
@@ -177,6 +184,15 @@ export class EdcClient {
     return this.urlUtil.getErrorUrl();
   }
 
+  /**
+   * Return the url for i18n translation files
+   * (for translating labels and other component's contents)
+   *
+   */
+  getI18nUrl(): string {
+    return this.urlUtil.getI18nUrl();
+  }
+
   getInformationMapFromDocId(id: number): Promise<InformationMap> {
     return this.globalTocReady.then(() => {
       const docPath = this.globalToc.index[id];
@@ -194,7 +210,7 @@ export class EdcClient {
   }
 
   initPluginId(pluginId: string): Promise<any> {
-    return edcClientService.getPluginIds(this.baseURL)
+    return edcClientService.getPluginIds(this.urlUtil.getBaseUrl())
       .then((pluginIds: string[]) => {
         if (isEmpty(pluginIds)) {
           throw new Error(`Could not init plugin : no available plugins`);
@@ -210,6 +226,23 @@ export class EdcClient {
 
   isPluginIdNew(newPluginId: string): boolean {
     return isEmpty(this.currentPluginId) || (newPluginId && this.currentPluginId !== newPluginId);
+  }
+
+  /**
+   * Return the default language code (2 letters) used in current documentation
+   *
+   */
+  getDefaultLanguage(): string {
+    return this.languageService.getDefaultLanguage();
+  }
+
+  /**
+   * Set the current language used for current documentation
+   *
+   * @param languageCode the 2 letters language code (en, fr..) to set
+   */
+  setCurrentLanguage(languageCode: string): void {
+    this.languageService.setCurrentLanguage(languageCode);
   }
 
 }

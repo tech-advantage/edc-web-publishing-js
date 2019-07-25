@@ -1,9 +1,19 @@
 export class UrlUtil {
 
-    private readonly helpURL: string;
+    static readonly I18N_DEFAULT_SUFFIX = 'i18n';
 
-    constructor(helpURL: string) {
+    private readonly baseURL: string;
+    private readonly helpURL: string;
+    private readonly i18nURL: string; // Url for the json translation files (labels and other texts internationalization)
+
+    constructor(baseURL: string, helpURL: string, i18nURL?: string) {
+        this.baseURL = baseURL;
         this.helpURL = helpURL;
+        this.i18nURL = i18nURL;
+    }
+
+    getBaseUrl(): string {
+      return this.baseURL;
     }
 
     getHomeUrl(): string {
@@ -20,5 +30,9 @@ export class UrlUtil {
 
     getDocumentationUrl(id: number): string {
         return `${this.helpURL}/doc/${id}`;
+    }
+
+    getI18nUrl(): string {
+      return this.i18nURL || `${this.baseURL}/${UrlUtil.I18N_DEFAULT_SUFFIX}`;
     }
 }
