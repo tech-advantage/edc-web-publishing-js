@@ -1,4 +1,4 @@
-import { first, get, isEmpty, join, some, split } from 'lodash';
+import { first, isEmpty, join, some, split } from 'lodash';
 import { Helper } from './entities/helper';
 import { Toc } from './entities/toc';
 import { MultiToc } from './entities/multi-toc';
@@ -12,9 +12,12 @@ import { DocumentationTransfer } from './entities/documentation-transfer';
 import { Info } from './entities/info';
 import { UrlUtil } from './utils/url-util';
 import { LanguageService } from './language-service';
+import { ContextualHelp } from './entities/contextual-help';
+import { Utils } from './utils/utils';
+import { DocumentationExport } from './entities/documentation-export';
 
 export class EdcClient {
-  context: any;
+  context: ContextualHelp;
   globalToc: MultiToc;
   currentPluginId: string;
   contextReady: Promise<any>;
@@ -48,7 +51,7 @@ export class EdcClient {
       .then((multiToc: MultiToc) => this.globalToc = multiToc);
   }
 
-  initLanguages(pluginId?: string): void {
+  initLanguages(context: any, pluginId?: string): void {
     this.getInfo(pluginId).then((info: Info) => {
       this.languageService = new LanguageService(info.languageId);
     });
@@ -64,7 +67,7 @@ export class EdcClient {
     return this.globalTocReady.then((tocs: MultiToc) => {
       const pluginId = targetPluginId || this.currentPluginId;
       if (pluginId) {
-        return get(edcClientService.findExportById(tocs.exports, pluginId), 'toc') as Toc;
+        return Utils.safeGet<DocumentationExport, Toc>(edcClientService.findExportById(tocs.exports, pluginId), ['toc']);
       }
     });
   }
@@ -197,12 +200,12 @@ export class EdcClient {
     return this.globalTocReady.then(() => {
       const docPath = this.globalToc.index[id];
       const iMPath = join(split(docPath, '.', 3), '.');
-      return get(this.globalToc, iMPath) as InformationMap;
+      return Utils.safeGet<MultiToc, InformationMap>(this.globalToc, [iMPath]);
     });
   }
 
   getKey(key: string, subKey: string, lang: string): Helper {
-    return get(this.context, `['${key}']['${subKey}']['${lang}']`);
+    return Utils.safeGet<ContextualHelp, Helper>(this.context, [key, subKey, lang]);
   }
 
   setCurrentPluginId(newPluginId: string): void {
@@ -215,7 +218,7 @@ export class EdcClient {
         if (isEmpty(pluginIds)) {
           throw new Error(`Could not init plugin : no available plugins`);
         }
-        if (!isEmpty(pluginId) && !some(pluginIds, id => id === pluginId)) {
+        if (!isEmpty(pluginId) && !some(pluginIds, (id: string) => id === pluginId)) {
           throw new Error(`Could not init plugin : No plugin was found with id "${pluginId}"`);
         }
 
@@ -241,8 +244,8 @@ export class EdcClient {
    *
    * @param languageCode the 2 letters language code (en, fr..) to set
    */
-  setCurrentLanguage(languageCode: string): void {
-    this.languageService.setCurrentLanguage(languageCode);
+  setCurrentLanguage(languageCode: string): string {
+    return this.languageService.setCurrentLanguage(this.context, languageCode);
   }
 
 }

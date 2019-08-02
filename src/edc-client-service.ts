@@ -24,7 +24,7 @@ export function createMultiToc(baseURL: string): Promise<MultiToc> {
 
 export function getPluginIds(baseURL: string): Promise<string[]> {
   return getHelpContent(baseURL, ContentTypeSuffix.TYPE_MULTI_TOC_SUFFIX)
-    .then((exports: DocumentationExport[]) => map(exports, exp => exp.pluginId));
+    .then((exports: DocumentationExport[]) => map(exports, (exp: DocumentationExport) => exp.pluginId));
 }
 
 export function getHelpContent(baseUrl: string, suffix: ContentTypeSuffix): Promise<any> {
@@ -116,7 +116,7 @@ function addExportToGlobalToc(rootUrl: string, currentToc: Toc, sourceExport: Do
 }
 
 function addInformationMapsToIndex(rootUrl: string, informationMaps: InformationMap[], multiToc: MultiToc): PromiseEs6<any> {
-  return PromiseEs6.all(map(informationMaps, (informationMap, key) => getHelpContent(`${rootUrl}/${informationMap.file}`, ContentTypeSuffix.TYPE_EMPTY_SUFFIX)
+  return PromiseEs6.all(map(informationMaps, (informationMap: InformationMap, key: number) => getHelpContent(`${rootUrl}/${informationMap.file}`, ContentTypeSuffix.TYPE_EMPTY_SUFFIX)
     .then((content: InformationMap) => addSingleIMContentToIndex(informationMap, content, key, multiToc))));
 }
 

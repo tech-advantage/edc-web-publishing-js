@@ -15,3 +15,7 @@ export function async(fn: any) {
     });
   };
 }
+
+export function mockContext(translations: string[]): any {
+
+}
