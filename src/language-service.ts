@@ -27,7 +27,7 @@ export class LanguageService {
   setCurrentLanguage(context: ContextualHelp, code: string): string {
     // Before setting a current language, check if there's any present content in context helper for the requested language
     if (!context || !this.isTranslationPresent(context, code)) {
-      // If not, use default
+      // If not, then use default
       code = this.getDefaultLanguage();
     }
     this.currentLanguage = code ? code.substr(0, 2) : this.defaultLanguage;

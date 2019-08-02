@@ -35,12 +35,12 @@ export class EdcClient {
     if (!contextOnly) {
       this.globalTocReady = this.initMultiToc();
     }
-    this.initLanguages(pluginId);
   }
 
   initContext(pluginId?: string): Promise<any> {
     return this.getContext(pluginId)
       .then(context => this.context = context)
+      .then(context => this.initLanguages(context, pluginId))
       .catch(err => {
         console.warn(`Edc-client-js : could not get context from plugin [${this.currentPluginId}]: ${err}`);
       });
@@ -51,9 +51,10 @@ export class EdcClient {
       .then((multiToc: MultiToc) => this.globalToc = multiToc);
   }
 
-  initLanguages(context: any, pluginId?: string): void {
-    this.getInfo(pluginId).then((info: Info) => {
+  initLanguages(context: ContextualHelp, pluginId?: string): Promise<ContextualHelp> {
+    return this.getInfo(pluginId).then((info: Info) => {
       this.languageService = new LanguageService(info.languageId);
+      return context;
     });
   }
 
