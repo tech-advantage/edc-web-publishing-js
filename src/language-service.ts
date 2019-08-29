@@ -1,4 +1,4 @@
-import { ContextualHelp } from './entities/contextual-help';
+import { LANGUAGE_CODES } from './language-codes';
 
 export class LanguageService {
 
@@ -6,10 +6,12 @@ export class LanguageService {
 
   private defaultLanguage: string;
   private currentLanguage: string;
+  private languages: string[];
 
-  constructor(defaultLanguage?: string) {
-    this.defaultLanguage = defaultLanguage ? defaultLanguage.substr(0, 2) : LanguageService.SYS_DEFAULT;
-    this.currentLanguage = defaultLanguage;
+  constructor(defaultLanguage?: string, languages: string[] = []) {
+    this.setDefaultLanguage(defaultLanguage);
+    this.setLanguages(languages);
+    this.setCurrentLanguage(defaultLanguage);
   }
 
   getDefaultLanguage(): string {
@@ -17,26 +19,27 @@ export class LanguageService {
   }
 
   setDefaultLanguage(code: string): void {
-    this.defaultLanguage = code ? code.substr(0, 2) : LanguageService.SYS_DEFAULT;
+    this.defaultLanguage = LANGUAGE_CODES.some(c => c === code) ? code.substr(0, 2) : LanguageService.SYS_DEFAULT;
   }
 
   getCurrentLanguage(): string {
     return this.currentLanguage;
   }
 
-  setCurrentLanguage(context: ContextualHelp, code: string): string {
-    // Before setting a current language, check if there's any present content in context helper for the requested language
-    if (!context || !this.isTranslationPresent(context, code)) {
-      // If not, then use default
-      code = this.getDefaultLanguage();
-    }
-    this.currentLanguage = code ? code.substr(0, 2) : this.defaultLanguage;
+  setCurrentLanguage(code: string): string {
+    this.currentLanguage = this.isLanguagePresent(code) ? code.substr(0, 2) : this.defaultLanguage;
     return this.currentLanguage;
   }
 
-  isTranslationPresent(context: ContextualHelp, langCode: string): boolean {
-    return Object.keys(context).some(contextKey => Object.keys(context[contextKey])
-      .some(subKey => Object.keys(context[contextKey][subKey]).some(lang => lang === langCode))
-    );
+  getLanguages(): string[] {
+    return this.languages;
+  }
+
+  setLanguages(languages: string[] = []): void {
+    this.languages = languages.filter(code => LANGUAGE_CODES.some(c => c === code));
+  }
+
+  isLanguagePresent(langCode: string): boolean {
+    return this.languages && this.languages.some(code => code === langCode);
   }
 }

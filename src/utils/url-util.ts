@@ -1,6 +1,8 @@
 export class UrlUtil {
 
-    static readonly I18N_DEFAULT_SUFFIX = 'i18n';
+    static readonly I18N_ROOT_FOLDER = 'i18n';
+    static readonly I18N_POPOVER_FOLDER = 'popover';
+    static readonly I18N_WEB_HELP_FOLDER = 'web-help';
 
     private readonly baseURL: string;
     private readonly helpURL: string;
@@ -32,7 +34,15 @@ export class UrlUtil {
         return `${this.helpURL}/doc/${id}`;
     }
 
-    getI18nUrl(): string {
-      return this.i18nURL || `${this.baseURL}/${UrlUtil.I18N_DEFAULT_SUFFIX}`;
+    getI18nBaseUrl(): string {
+      return `${this.baseURL}/${UrlUtil.I18N_ROOT_FOLDER}`;
+    }
+
+    getWebHelpI18nUrl(): string {
+      return this.i18nURL || `${this.getI18nBaseUrl()}/${UrlUtil.I18N_WEB_HELP_FOLDER}`;
+    }
+
+    getPopoverI18nUrl(): string {
+      return this.i18nURL || `${this.getI18nBaseUrl()}/${UrlUtil.I18N_POPOVER_FOLDER}`;
     }
 }

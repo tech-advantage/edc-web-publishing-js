@@ -18,7 +18,8 @@ describe('EDC client', () => {
   beforeEach(() => {
 
     info = mock(Info, {
-      languageId: 'ru'
+      defaultLanguage: 'ru',
+      languages: ['ru', 'en', 'fr']
     });
 
     context = {
@@ -71,7 +72,7 @@ describe('EDC client', () => {
 
       return Promise.all([edcClient.contextReady, edcClient.globalTocReady]).then(() => {
 
-        expect(edcClientService.createMultiToc).toHaveBeenCalledWith(baseURL);
+        expect(edcClientService.createMultiToc).toHaveBeenCalledWith(baseURL, 'ru');
         expect(edcClient.globalToc).toEqual(globalToc);
         expect(edcClient.context).toEqual(context);
         expect(edcClient.urlUtil.getBaseUrl()).toEqual(baseURL);
@@ -89,7 +90,7 @@ describe('EDC client', () => {
 
       return Promise.all([edcClient.contextReady, edcClient.globalTocReady]).then(() => {
 
-        expect(edcClientService.createMultiToc).toHaveBeenCalledWith(baseURL);
+        expect(edcClientService.createMultiToc).toHaveBeenCalledWith(baseURL, 'ru');
         expect(edcClientService.getPluginIds).toHaveBeenCalledWith(baseURL);
         expect(edcClient.globalToc).toEqual(globalToc);
         expect(edcClient.context).toEqual(context);
@@ -116,6 +117,7 @@ describe('EDC client', () => {
         // Should have init based on info.json defaultLanguageId value
         expect(edcClient.languageService.getDefaultLanguage()).toEqual('ru');
         expect(edcClient.languageService.getCurrentLanguage()).toEqual('ru');
+        expect(edcClient.languageService.getLanguages()).toEqual(['ru', 'en', 'fr']);
 
         expect(edcClientService.getHelpContent).toHaveBeenCalledWith('http://base.url:8080/doc/myExportId2', ContentTypeSuffix.TYPE_INFO_SUFFIX);
         expect(edcClientService.getHelpContent).toHaveBeenCalledWith('http://base.url:8080/doc/myExportId2', ContentTypeSuffix.TYPE_CONTEXT_SUFFIX);
@@ -170,24 +172,35 @@ describe('EDC client', () => {
       });
     }));
 
-    it('should get default i18n url', async(() => {
+    it('should get popover i18n url', async(() => {
       const baseURL = 'http://base.url:8080/doc';
       const helpURL = 'http://base.url:8080/help';
       edcClient = new EdcClient(baseURL, helpURL, 'myExportId2');
 
       return Promise.all([edcClient.contextReady, edcClient.globalTocReady]).then(() => {
-        expect(edcClient.getI18nUrl()).toEqual('http://base.url:8080/doc/i18n');
+        expect(edcClient.getPopoverI18nUrl()).toEqual('http://base.url:8080/doc/i18n/popover');
+      });
+    }));
+
+    it('should get web help i18n url', async(() => {
+      const baseURL = 'http://base.url:8080/doc';
+      const helpURL = 'http://base.url:8080/help';
+      edcClient = new EdcClient(baseURL, helpURL, 'myExportId2');
+
+      return Promise.all([edcClient.contextReady, edcClient.globalTocReady]).then(() => {
+        expect(edcClient.getWebHelpI18nUrl()).toEqual('http://base.url:8080/doc/i18n/web-help');
       });
     }));
 
     it('should get custom i18n url', async(() => {
       const baseURL = 'http://base.url:8080/doc';
       const helpURL = 'http://base.url:8080/help';
-      const i18nURL = 'http://base.url:8080/customI18N/i18n';
+      const i18nURL = 'http://base.url:8080/customI18N/i18n/custom';
       edcClient = new EdcClient(baseURL, helpURL, 'myExportId2', true, i18nURL);
 
       return Promise.all([edcClient.contextReady, edcClient.globalTocReady]).then(() => {
-        expect(edcClient.getI18nUrl()).toEqual('http://base.url:8080/customI18N/i18n');
+        expect(edcClient.getPopoverI18nUrl()).toEqual(i18nURL);
+        expect(edcClient.getWebHelpI18nUrl()).toEqual(i18nURL);
       });
     }));
   });

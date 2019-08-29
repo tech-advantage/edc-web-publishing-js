@@ -1,4 +1,4 @@
-import { chain, reduce, assign } from 'lodash';
+import { chain, reduce, join, first, split, assign } from 'lodash';
 import { Documentation } from '../entities/documentation';
 import { Indexable } from '../entities/indexable';
 
@@ -26,7 +26,7 @@ export class Utils {
       }
 
       // recall the function upon topics until finding the leaf
-      return assign(memo, this.indexTree(topics, newPrefix));
+      return assign(memo, Utils.indexTree(topics, newPrefix));
     }, {});
     return tree;
   }
@@ -55,5 +55,25 @@ export class Utils {
       currentSrc = prop && currentSrc && currentSrc[prop] ? currentSrc[prop] : null;
     });
     return currentSrc as G;
+  }
+
+  /**
+   * Return the export id path from the given documentation index path
+   *
+   * @param docPath the path of the given documentation in a multiToc index
+   */
+  static findExportPathFromDocPath(docPath: string): string {
+    const rootPath = first(split(docPath, '.'));
+    return `${rootPath}.pluginId`;
+  }
+
+  /**
+   * Return the information map index path from the given documentation index path
+   *
+   * @param docPath the path of the documentation in a multiToc index
+   */
+  static findIMPathFromDocPath(docPath: string): string {
+    // The information map is at the third level of the documentation index path, discard the rest to get its path
+    return join(split(docPath, '.', 3), '.');
   }
 }

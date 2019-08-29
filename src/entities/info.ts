@@ -2,6 +2,8 @@ export class Info {
   vendor: string;
   version: string;
   name: string;
+  titles: { [key: string]: {title: string} };
   identifier: string;
-  languageId: string; // Language used by default in this documentation
+  defaultLanguage: string; // Language used by default
+  languages: string[]; // Languages presents in this export
 }
