@@ -6,6 +6,10 @@ describe('url util', () => {
         expect(urlUtil.getDocumentationUrl(12)).toEqual('http://localhost:8080/help/doc/12');
     });
 
+    it('should return the documentation url with requested language', () => {
+        expect(urlUtil.getDocumentationUrl(12, 'en')).toEqual('http://localhost:8080/help/doc/12/en');
+    });
+
     it('should return the conxtextual url', () => {
         expect(urlUtil.getContextUrl('edcHelp', 'fr.techad.edc', 'types', 'en', 1)).toEqual('http://localhost:8080/help/context/edcHelp/fr.techad.edc/types/en/1');
     });

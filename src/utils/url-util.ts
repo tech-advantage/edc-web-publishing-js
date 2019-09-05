@@ -30,8 +30,9 @@ export class UrlUtil {
         return `${this.helpURL}/context/${publicationId}/${mainKey}/${subKey}/${languageCode}/${articleIndex}`;
     }
 
-    getDocumentationUrl(id: number): string {
-        return `${this.helpURL}/doc/${id}`;
+    getDocumentationUrl(id: number, lang?: string): string {
+      const langSuffix = lang ? `/${lang}` : '';
+        return `${this.helpURL}/doc/${id}${langSuffix}`;
     }
 
     getI18nBaseUrl(): string {

@@ -193,9 +193,11 @@ export class EdcClient {
   /**
    * Return the documentation web help url.
    * @param id the documentation identifier
+   * @param languageCode the language code to use
    */
-  getDocumentationWebHelpUrl(id: number): string {
-    return this.urlUtil.getDocumentationUrl(id);
+  getDocumentationWebHelpUrl(id: number, languageCode?: string): string {
+    const lang = this.isLanguagePresent(languageCode) ? languageCode : this.languageService.getCurrentLanguage();
+    return this.urlUtil.getDocumentationUrl(id, lang);
   }
 
   /**

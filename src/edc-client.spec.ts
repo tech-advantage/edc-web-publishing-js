@@ -127,12 +127,44 @@ describe('EDC client', () => {
 
   describe('Runtime', () => {
 
-    it('should get documentation url', async(() => {
+    it('should get documentation url with default language', async(() => {
       const baseURL = 'http://base.url:8080/doc';
       const helpURL = 'http://base.url:8080/help';
       edcClient = new EdcClient(baseURL, helpURL, 'myExportId2');
-      return Promise.all([edcClient.contextReady, edcClient.globalTocReady]).then(() => {
-        expect(edcClient.getDocumentationWebHelpUrl(12)).toEqual('http://base.url:8080/help/doc/12');
+      return Promise.all([edcClient.infoReady, edcClient.contextReady, edcClient.globalTocReady]).then(() => {
+        expect(edcClient.getDocumentationWebHelpUrl(12)).toEqual('http://base.url:8080/help/doc/12/ru');
+      });
+    }));
+
+    it('should get documentation url with default language if current language is defined', async(() => {
+      const baseURL = 'http://base.url:8080/doc';
+      const helpURL = 'http://base.url:8080/help';
+      edcClient = new EdcClient(baseURL, helpURL, 'myExportId2', true, 'ru');
+      return Promise.all([edcClient.infoReady, edcClient.contextReady, edcClient.globalTocReady]).then(() => {
+        // edcClient.languageService = new LanguageService('ru', ['ru', 'fr', 'en']);
+        edcClient.languageService.setCurrentLanguage('fr');
+        expect(edcClient.languageService.getDefaultLanguage()).toEqual('ru');
+        expect(edcClient.languageService.getCurrentLanguage()).toEqual('fr');
+        expect(edcClient.getDocumentationWebHelpUrl(12)).toEqual('http://base.url:8080/help/doc/12/fr');
+      });
+    }));
+
+    it('should get documentation url with requested language', async(() => {
+      const baseURL = 'http://base.url:8080/doc';
+      const helpURL = 'http://base.url:8080/help';
+      edcClient = new EdcClient(baseURL, helpURL, 'myExportId2', true, 'ru');
+      return Promise.all([edcClient.infoReady, edcClient.contextReady, edcClient.globalTocReady]).then(() => {
+        expect(edcClient.getDocumentationWebHelpUrl(12, 'fr')).toEqual('http://base.url:8080/help/doc/12/fr');
+      });
+    }));
+
+    it('should get documentation url with default language if requested is not present', async(() => {
+      const baseURL = 'http://base.url:8080/doc';
+      const helpURL = 'http://base.url:8080/help';
+      edcClient = new EdcClient(baseURL, helpURL, 'myExportId2', true, 'ru');
+      return Promise.all([edcClient.infoReady, edcClient.contextReady, edcClient.globalTocReady]).then(() => {
+        edcClient.languageService.setCurrentLanguage('fr');
+        expect(edcClient.getDocumentationWebHelpUrl(12, 'it')).toEqual('http://base.url:8080/help/doc/12/fr');
       });
     }));
 
@@ -140,7 +172,7 @@ describe('EDC client', () => {
       const baseURL = 'http://base.url:8080/doc';
       const helpURL = 'http://base.url:8080/help';
       edcClient = new EdcClient(baseURL, helpURL, 'myExportId2');
-      return Promise.all([edcClient.contextReady, edcClient.globalTocReady]).then(() => {
+      return Promise.all([edcClient.infoReady, edcClient.contextReady, edcClient.globalTocReady]).then(() => {
         expect(edcClient.getContextWebHelpUrl('fr.techad.edc', 'types', 'en', 1)).toEqual('http://base.url:8080/help/context/myExportId2/fr.techad.edc/types/en/1');
       });
     }));
