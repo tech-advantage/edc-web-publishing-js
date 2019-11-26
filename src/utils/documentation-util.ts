@@ -11,12 +11,14 @@ import { LanguageService } from '../services/language.service';
 export class DocumentationUtil {
 
   /**
-   * creates a map of paths from the documentations of the given tree
-   * following the structure : [0].topics[1].topics[0]
-   * @param indexables : item list of the Tree
-   * @param prefix: concatenation of parents id
-   * @param isRoot: true if indexables is a root
-   * @return {{}} returns a map with the paths of all documentations of the tree
+   * Creates a map of paths from the documentations of the given tree following the structure :
+   *     key: the identifier of the indexable
+   *     value: its path in the multiToc : (example toc[0][langCode].topics[1].topics[0])
+   *
+   * @param {Indexable[]} indexables : item list of the Tree
+   * @param {string} prefix: concatenation of parents id
+   * @param {boolean} isRoot: true if indexables is a root (initial function call)
+   * @return {{ [key: string]: string }} returns a map with the paths of all documentations of the tree
    */
   static indexTree(indexables: Indexable[], prefix?: string, isRoot?: boolean): { [key: string]: string } {
     // iterate through topics and reduce the documentations concatenating the path with parents

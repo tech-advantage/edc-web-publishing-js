@@ -3,6 +3,7 @@ import axios, { AxiosResponse, AxiosError } from 'axios';
 import { Promise as PromiseEs6 } from 'es6-promise';
 import { ContentTypeSuffix } from '../entities/content-type';
 import { UrlConfigService } from '../services/url-config.service';
+import { Loadable } from '../entities/loadable';
 
 export class EdcHttpClient {
 
@@ -35,5 +36,17 @@ export class EdcHttpClient {
     return axios.get(url)
       .then((res: AxiosResponse) => get(res, 'status') === 200 ? res.data : null,
         (err: AxiosError) => PromiseEs6.reject(err));
+  }
+
+  getItemContent<T extends Loadable>(item: T): PromiseEs6<T> {
+    if (!item || !item.url) {
+      return null;
+    }
+    return this.getFile(item.url)
+      .then((content: string) => {
+        item.content = content;
+        return item;
+      }, (): T => null)
+      .catch((): T => null);
   }
 }

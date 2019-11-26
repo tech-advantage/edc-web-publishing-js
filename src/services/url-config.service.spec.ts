@@ -1,6 +1,6 @@
 import { UrlConfigService } from './url-config.service';
 
-describe('url util', () => {
+describe('UrlConfig service', () => {
   let urlConfigService: UrlConfigService;
   beforeEach(() => {
     urlConfigService = UrlConfigService.getInstance();

@@ -11,6 +11,14 @@ import { Documentation } from '../entities/documentation';
 import { DocumentationUtil } from '../utils/documentation-util';
 import { LanguageService } from './language.service';
 
+/**
+ * Service for handling operations on documentations
+ *
+ * At initialization, it will read all the table of contents for every present export
+ * and store them into the MultiToc.
+ * Creates an index of the multiToc, for fetching any element from its id
+ *
+ */
 export class DocumentationService {
   private static instance: DocumentationService;
 
@@ -40,7 +48,7 @@ export class DocumentationService {
 
   getDocumentation(id: number, langCode: string, defaultLang?: string): PromiseEs6<Documentation> {
     return this.globalTocReady.then((multiToc: MultiToc) => DocumentationUtil.findDocumentationFromId(multiToc, id, langCode, defaultLang))
-      .then((doc: Documentation) => Utils.getContent<Documentation>(doc, this.httpClient));
+      .then((doc: Documentation) => this.httpClient.getItemContent<Documentation>(doc));
   }
 
   findPluginIdFromDocumentationId(docId: number): PromiseEs6<string> {

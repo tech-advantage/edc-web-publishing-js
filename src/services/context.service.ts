@@ -64,8 +64,8 @@ export class ContextService {
       helper.language = lang;
       helper.exportId = pluginId;
       return PromiseEs6.all(
-              [Utils.getContent<Helper>(helper, this.httpClient),
-                ...helper.articles.map(article => Utils.getContent<Article>(article, this.httpClient))]
+              [this.httpClient.getItemContent<Helper>(helper),
+                ...helper.articles.map(article => this.httpClient.getItemContent<Article>(article))]
             ).then(() => helper);
     });
   }

@@ -136,11 +136,12 @@ export class ExportInfoService {
    * @param requestedLang the language to set
    */
   setCurrentExportId(exportId?: string, requestedLang?: string): string {
-    const exists = this.doesExportExist(exportId);
-    if (exists && exportId !== this.currentExportId) {
+    if (this.doesExportExist(exportId) && exportId !== this.currentExportId) {
       this.currentExportId = exportId;
+      // If it s a new export, reset the language information, trying to conserve the requested language
       this.initLanguages(requestedLang);
     } else if (requestedLang) {
+      // No new export, just check and change current language
       this.translationService.setCurrentLanguage(requestedLang);
     }
     return this.getCurrentExportId();
