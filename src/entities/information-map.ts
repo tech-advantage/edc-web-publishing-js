@@ -4,7 +4,7 @@ import { Contents } from './contents';
 
 export class InformationMap extends Contents<Documentation> implements Indexable {
   id: number;
-  label: string;
-  file: string;
+  label?: string;
+  file?: string;
   topics?: Documentation[];
 }

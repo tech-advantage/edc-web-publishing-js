@@ -11,4 +11,5 @@ export class Helper implements Loadable, Linkable {
   content?: string;
   articles: Article[];
   links: Link[];
+  language?: string;
 }
