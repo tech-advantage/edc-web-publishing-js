@@ -1,24 +1,14 @@
 import { UrlUtil } from './url-util';
 
 describe('url util', () => {
-    const urlUtil = new UrlUtil('http://localhost:8080', 'http://localhost:8080/help');
-    it('should return the documentation url', () => {
-        expect(urlUtil.getDocumentationUrl(12)).toEqual('http://localhost:8080/help/doc/12');
+  describe('getFileUrl', () => {
+    it('should return the file url', () => {
+        const fileUrl = UrlUtil.getFileUrl('http://localhost/doc', 'my-file.json');
+        expect(fileUrl).toEqual('http://localhost/doc/my-file.json');
     });
-
-    it('should return the documentation url with requested language', () => {
-        expect(urlUtil.getDocumentationUrl(12, 'en')).toEqual('http://localhost:8080/help/doc/12/en');
+    it('should return the file url with export prefix', () => {
+        const fileUrl = UrlUtil.getFileUrl('http://localhost/doc', 'my-file.json', 'myExport1');
+        expect(fileUrl).toEqual('http://localhost/doc/myExport1/my-file.json');
     });
-
-    it('should return the conxtextual url', () => {
-        expect(urlUtil.getContextUrl('edcHelp', 'fr.techad.edc', 'types', 'en', 1)).toEqual('http://localhost:8080/help/context/edcHelp/fr.techad.edc/types/en/1');
-    });
-
-    it('should return the error url', () => {
-        expect(urlUtil.getErrorUrl()).toEqual('http://localhost:8080/help/error');
-    });
-
-    it('should return the home url', () => {
-        expect(urlUtil.getHomeUrl()).toEqual('http://localhost:8080/help/home');
-    });
+  });
 });

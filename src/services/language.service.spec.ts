@@ -1,11 +1,12 @@
-import { LanguageService } from './language-service';
+import { LanguageService } from './language.service';
 
 describe('LanguageService test', () => {
 
   let languageService: LanguageService;
 
   beforeEach(() => {
-    languageService = new LanguageService('en', ['de', 'fr']);
+    languageService = LanguageService.getInstance();
+    languageService.init('en', 'en', ['de', 'fr']);
   });
 
   describe('isLanguagePresent', () => {
