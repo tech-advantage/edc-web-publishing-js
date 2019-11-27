@@ -112,7 +112,7 @@ export class ExportInfoService {
     this.infos.clear();
     return this.httpClient.getContent(ContentTypeSuffix.TYPE_INFO_SUFFIX, exportInfo.pluginId)
       .then((info: Info) => {
-        exportInfo.info = info;
+        exportInfo.info = this.getInfo(info, exportInfo.pluginId);
         this.infos.set(exportInfo.pluginId, exportInfo);
         return info;
       })
@@ -184,6 +184,18 @@ export class ExportInfoService {
       currentInfo = this.infos.get(this.getCurrentExportId()).info;
     }
     return currentInfo;
+  }
+
+  getInfo(info: Info, pluginId: string): Info {
+    if (!info || !info.identifier) {
+      throw new Error(`Info.json file of plugin ${pluginId} is not valid`);
+    }
+    // For old exports: set system language if default language is not defined
+    if (!info.defaultLanguage) {
+      info.defaultLanguage = LanguageService.SYS_DEFAULT;
+      info.languages = [LanguageService.SYS_DEFAULT];
+    }
+    return info;
   }
 
 }
