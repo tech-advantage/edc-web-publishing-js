@@ -1,0 +1,39 @@
+// Contents defined with all supported languages
+export class Contents<T> {
+  en?: T; // English
+  ar?: T; // Arabic
+  bg?: T; // Bulgarian
+  zh?: T; // Chinese
+  hr?: T; // Croatian
+  cs?: T; // Czech
+  da?: T; // Danish
+  nl?: T; // Dutch
+  et?: T; // Estonian
+  fi?: T; // Finnish
+  fr?: T; // French
+  de?: T; // German
+  el?: T; // Greek
+  he?: T; // Hebrew
+  hu?: T; // Hungarian
+  is?: T; // Icelandic
+  ga?: T; // Irish
+  it?: T; // Italian
+  ja?: T; // Japanese
+  ko?: T; // Korean
+  lv?: T; // Latvian
+  lt?: T; // Lithuanian
+  lb?: T; // Luxembourgish
+  mt?: T; // Maltese
+  no?: T; // Norwegian
+  fa?: T; // Persian
+  pl?: T; // Polish
+  pt?: T; // Portuguese
+  ro?: T; // Romanian
+  ru?: T; // Russian
+  sk?: T; // Slovak
+  sl?: T; // Slovenian
+  es?: T; // Spanish
+  sv?: T; // Swedish
+  tr?: T; // Turkish
+  vi?: T; // Vietnamese
+}

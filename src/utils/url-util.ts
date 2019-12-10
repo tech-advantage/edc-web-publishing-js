@@ -1,24 +1,20 @@
+import { ContentsPresentInExports, ContentTypeSuffix } from '../entities/content-type';
+
 export class UrlUtil {
 
-    private readonly helpURL: string;
-
-    constructor(helpURL: string) {
-        this.helpURL = helpURL;
+    static getFileUrl(baseUrl: string, fileName: string, exportId?: string): string {
+      const exportIdPrefix = exportId ? `${exportId}/` : '';
+      return `${baseUrl}/${exportIdPrefix}${fileName}`;
     }
 
-    getHomeUrl(): string {
-        return this.helpURL + '/home';
-    }
+    static getContentUrl(baseUrl: string, contentType: ContentTypeSuffix, exportId?: string): string {
+      const exportIdMissing = ContentsPresentInExports.indexOf(contentType) > -1 && !exportId;
+      if (exportIdMissing) {
+        return null;
+      }
+      const exportIdPrefix = exportId ? `${exportId}` : '';
+      const typeSuffix = contentType ? `${contentType}` : '';
 
-    getErrorUrl(): string {
-        return this.helpURL + '/error';
-    }
-
-    getContextUrl(publicationId: string, mainKey: string, subKey: string, languageCode: string, articleIndex: number): string {
-        return `${this.helpURL}/context/${publicationId}/${mainKey}/${subKey}/${languageCode}/${articleIndex}`;
-    }
-
-    getDocumentationUrl(id: number): string {
-        return `${this.helpURL}/doc/${id}`;
+      return `${baseUrl}/${exportIdPrefix}${typeSuffix}`;
     }
 }
