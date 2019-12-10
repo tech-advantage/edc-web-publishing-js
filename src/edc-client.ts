@@ -40,7 +40,6 @@ export class EdcClient {
     return this.contentService.getContentReady(exportId, contextOnly, langCode);
   }
 
-
   /**
    * Return the title of the current export Id
    * Will perform content initialization if it wasn't loaded yet
