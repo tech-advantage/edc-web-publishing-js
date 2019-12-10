@@ -8,7 +8,7 @@ Learn more at [https://www.easydoccontents.com](https://www.easydoccontents.com)
 
 ## edc Version Compatibility
 
-edc current release (v2.7+) uses edc-client-js v2.1.1
+Current release is compatible with edc v3.0+
 
 ## Note
 
@@ -44,7 +44,7 @@ The edc help client has been made to be used with any web framework.
 
 To use the help client, you first have to instantiate a new EdcClient.
 
-Below is an exemple for an Angular Typescript project, where exported documentation is served on `/doc` url :
+Below is an example for an Angular Typescript project, where exported documentation is served on `/doc` url :
 
 ```
 this.edcClient = new EdcClient('/doc/');
@@ -56,17 +56,18 @@ Note that you can use ES6 imports to import classes from `edc-client-js` :
 import { EdcClient, Documentation, Helper, InformationMap } from 'edc-client-js';
 ```
 
-### Calling client 
+### Calling the help client 
 
-The edc help client expose several methods to get content :
+The edc help client exposes several methods to get the content :
 
-* **getInfo()**
+* **getContent(): Promise\<ExportInfo\>**
 
-Returns a promise containing the content of the `info.json` file  from the export.
+Returns a promise when the content is ready, containing information about current content, including the `info.json` file from the export, the current plugin and language ids.
+(see [ExportInfo](https://github.com/tech-advantage/edc-client-js/blob/master/src/entities/export-info.ts) object)
 
-* **getContext()**
+* **getTitle(): Promise\<string\>**
 
-Returns a promise containing the content of the `context.json` file  from the export.
+Returns a promise containing the title of the current documentation, in the current language.
 
 * **getToc(): Promise\<Toc\>**
 
@@ -78,26 +79,61 @@ edcClient.getToc().then(toc: Toc => this.toc = toc);
 
 * **getHelper(mainKey, subKey): Promise\<Helper\>**
 
-Useful to get help content (see [Helper](https://github.com/tech-advantage/edc-client-js/blob/master/src/entities/helper.ts) object) for a particular key/subkey.
+Provides help content for the brick identified by the given keys.
+Contains the brick description, articles, links and information about the export.
+
+(see [Helper](https://github.com/tech-advantage/edc-client-js/blob/master/src/entities/helper.ts) object).
 
 * **getDocumentation(idDocumentation): Promise\<Documentation\>**
 
-Useful to get help content (see [Documentation](https://github.com/tech-advantage/edc-client-js/blob/master/src/entities/documentation.ts) object) for a particular documentation.
+Provides help content for a particular documentation, and information about how the request has been resolved, ie the language for this content, the export id it belongs to.
+
+(see [DocumentationTransfer](https://github.com/tech-advantage/edc-client-js/blob/master/src/entities/documentation-transfer.ts) ,
+[Documentation](https://github.com/tech-advantage/edc-client-js/blob/master/src/entities/documentation.ts) objects).
 
 * **getInformationMapFromDocId(): Promise\<InformationMap\>**
 
-Useful to retrieve information map for a particular documentation.
+Returns a promise containing the information map of the given documentation.
 
 See [InformationMap](https://github.com/tech-advantage/edc-client-js/blob/master/src/entities/information-map.ts).
 
+### Translations
 
-* **getContent()**
+edc supports multi language documentations, and a translation language can be specified when requesting a content from the help client.
 
-_Will be private in next release._
+Content language resolution will be based on the export information present in the info.json files (default language, present translation languages).
 
-* **getKey()**
+The help client will try and resolve the content in the requested language; if no content was found, it will use the last resolved language, or default export language as a final fallback.
 
-_Will be private in next release._
+Note that returned context content (Helper.ts) and documentation content (DocumentationTransfer.ts) have the resolved language, so you can update your component translation settings if you want it to follow the documentation's.
+
+### Navigation
+
+edc-client-js provides content urls, to make navigation to documentation in the web help explorer easier.
+
+* **getContextWebHelpUrl(): string**
+
+Returns the url for loading the contextual help in the web help explorer (edc-help-ng).
+
+* **getDocumentationWebHelpUrl(): string**
+
+Returns the url for loading the documentation in the web help explorer (edc-help-ng).
+
+* **getHomeWebHelpUrl(): string**
+
+The edc-help-ng home url.
+
+* **getErrorWebHelpUrl(): string**
+
+The edc-help-ng error page url.
+
+* **getPopoverI18nUrl(): string**
+
+Returns the url for the i18n popover files, for customizing label translations in the [edc-popover-ng project](https://github.com/tech-advantage/edc-popover-ng).
+
+* **getWebHelpI18nUrl(): string**
+
+Returns the url of the i18n web help explorer files, for customizing label translations in the edc-help-ng project.
 
 ## More
 

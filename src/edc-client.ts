@@ -53,7 +53,6 @@ export class EdcClient {
 
   /**
    * Get the table of content (toc) for the given export
-   * Will set the
    * if exportId is not defined return the toc for the current export
    *
    * @param {string} exportId the identifier of the export
@@ -89,7 +88,8 @@ export class EdcClient {
   }
 
   /**
-   * Return the contextual web help url
+   * Returns the url for loading the contextual help in the web help explorer (edc-help-ng).
+   *
    * @param mainKey the main key
    * @param subKey the sub key
    * @param languageCode the language code
@@ -103,7 +103,8 @@ export class EdcClient {
   }
 
   /**
-   * Return the documentation web help url.
+   * Returns the url for loading the documentation in the web help explorer (edc-help-ng).
+   *
    * @param id the documentation identifier
    * @param languageCode the language code to use
    */
@@ -145,6 +146,11 @@ export class EdcClient {
     return this.urlConfigService.getWebHelpI18nUrl();
   }
 
+  /**
+   * Returns the information map of the given documentation.
+   *
+   * @param id: the identifier of the documentation
+   */
   getInformationMapFromDocId(id: number): PromiseEs6<InformationMap> {
     return this.contentService.getInformationMapFromDocId(id);
   }
