@@ -78,7 +78,9 @@ export class ContextService {
       }
       const labels: PopoverLabel = new PopoverLabel();
       labels.url = `${url}/${langCode}.json`;
-      return this.httpClient.getItemContent<PopoverLabel>(labels);
+      return PromiseEs6.all(
+        [this.httpClient.getItemContent<PopoverLabel>(labels)]
+      ).then(() => labels);
     });
   }
 }
