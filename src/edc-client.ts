@@ -109,7 +109,7 @@ export class EdcClient {
    * @param languageCode the language code to use
    */
   getDocumentationWebHelpUrl(id: number, languageCode?: string): string {
-    let lang = this.languageService.isLanguagePresent(languageCode) ? languageCode : this.languageService.getCurrentLanguage();
+    const lang = this.languageService.isLanguagePresent(languageCode) ? languageCode : this.languageService.getCurrentLanguage();
     const exportId = this.contentService.getCurrentPluginId();
     return this.urlConfigService.getDocumentationUrl(id, lang, exportId);
   }
