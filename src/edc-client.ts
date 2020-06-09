@@ -7,7 +7,7 @@ import { ContentService } from './services/content.service';
 import { UrlConfigService } from './services/url-config.service';
 import { LanguageService } from './services/language.service';
 import { ExportInfo } from './entities/export-info';
-import {PopoverLabel} from "./entities/popover-label";
+import {PopoverLabel} from './entities/popover-label';
 
 export class EdcClient {
   private contentService: ContentService;

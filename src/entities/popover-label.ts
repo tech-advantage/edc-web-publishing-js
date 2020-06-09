@@ -1,4 +1,4 @@
-import { Loadable } from "./loadable";
+import { Loadable } from './loadable';
 
 export class PopoverLabel implements Loadable {
   exportId: string;

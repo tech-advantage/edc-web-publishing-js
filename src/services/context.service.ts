@@ -6,7 +6,7 @@ import { ContextualHelp } from '../entities/contextual-help';
 import { Utils } from '../utils/utils';
 import { ContextualExport } from '../entities/ContextualExport';
 import { Article } from '../entities/article';
-import {PopoverLabel} from "../entities/popover-label";
+import {PopoverLabel} from '../entities/popover-label';
 
 /**
  * For reading and returning the documentation context content
@@ -78,7 +78,7 @@ export class ContextService {
       }
       const labels: PopoverLabel = new PopoverLabel();
       labels.url = `${url}/${langCode}.json`;
-      return this.httpClient.getItemContent<PopoverLabel>(labels)
+      return this.httpClient.getItemContent<PopoverLabel>(labels);
     });
   }
 }

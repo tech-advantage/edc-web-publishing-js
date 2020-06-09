@@ -9,7 +9,7 @@ import { DocumentationTransfer } from '../entities/documentation-transfer';
 import { InformationMap } from '../entities/information-map';
 import { Toc } from '../entities/toc';
 import { Documentation } from '../entities/documentation';
-import {PopoverLabel} from "../entities/popover-label";
+import {PopoverLabel} from '../entities/popover-label';
 
 /**
  * The main service handling the contents for all the exports (aka plugins)
