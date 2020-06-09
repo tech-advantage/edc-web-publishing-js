@@ -7,6 +7,7 @@ import { ContentService } from './services/content.service';
 import { UrlConfigService } from './services/url-config.service';
 import { LanguageService } from './services/language.service';
 import { ExportInfo } from './entities/export-info';
+import {PopoverLabel} from "./entities/popover-label";
 
 export class EdcClient {
   private contentService: ContentService;
@@ -143,6 +144,21 @@ export class EdcClient {
    */
   getWebHelpI18nUrl(): string {
     return this.urlConfigService.getWebHelpI18nUrl();
+  }
+
+  /**
+   * Returns the translated popover labels
+   * if pluginId is not defined, it will try and find the content in the current plugin Id export
+   * @param {string} exportId the main key of the requested contextual help element
+   * @param {string} languageCode the secondary key of the requested contextual help element
+   * @return {PromiseEs6<PopoverLabel>} a promise containing the popover labels
+   */
+  getPopoverLabels(languageCode?: string, exportId?: string): PromiseEs6<PopoverLabel> {
+    const lang = this.languageService.isLanguagePresent(languageCode) ? languageCode : this.languageService.getCurrentLanguage();
+    const pluginId = exportId || this.contentService.getCurrentPluginId();
+    return this.getContent()
+      .then(() => this.getPopoverI18nUrl())
+      .then((url: string) => this.contentService.getPopoverLabel(lang, pluginId, url));
   }
 
   /**

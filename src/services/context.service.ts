@@ -6,6 +6,7 @@ import { ContextualHelp } from '../entities/contextual-help';
 import { Utils } from '../utils/utils';
 import { ContextualExport } from '../entities/ContextualExport';
 import { Article } from '../entities/article';
+import {PopoverLabel} from "../entities/popover-label";
 
 /**
  * For reading and returning the documentation context content
@@ -70,4 +71,14 @@ export class ContextService {
     });
   }
 
+  getPopoverLabel(langCode: string, pluginId: string, url: string): PromiseEs6<PopoverLabel> {
+    return this.initContext(pluginId).then(() => {
+      if (!this.context || !this.context.contextualHelp) {
+        return null;
+      }
+      const labels: PopoverLabel = new PopoverLabel();
+      labels.url = `${url}/${langCode}.json`;
+      return this.httpClient.getItemContent<PopoverLabel>(labels)
+    });
+  }
 }
