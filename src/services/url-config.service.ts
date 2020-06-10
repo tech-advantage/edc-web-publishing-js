@@ -55,11 +55,11 @@ export class UrlConfigService {
   }
 
   getWebHelpI18nUrl(): string {
-    return this.i18nURL || `${this.getI18nBaseUrl()}/${UrlConfigService.I18N_WEB_HELP_FOLDER}`;
+    return `${this.getI18nBaseUrl()}/${UrlConfigService.I18N_WEB_HELP_FOLDER}`;
   }
 
   getPopoverI18nUrl(): string {
-    return this.i18nURL || `${this.getI18nBaseUrl()}/${UrlConfigService.I18N_POPOVER_FOLDER}`;
+    return `${this.getI18nBaseUrl()}/${UrlConfigService.I18N_POPOVER_FOLDER}`;
   }
 
   getFileUrl(fileUrl: string, exportId?: string): string {
@@ -70,4 +70,7 @@ export class UrlConfigService {
     return UrlUtil.getContentUrl(this.getBaseUrl(), contentType, exportId);
   }
 
+  getPopoverLabelsPath(lang: string): string {
+    return `${UrlConfigService.I18N_ROOT_FOLDER}/${UrlConfigService.I18N_POPOVER_FOLDER}/${lang}.json`;
+  }
 }
