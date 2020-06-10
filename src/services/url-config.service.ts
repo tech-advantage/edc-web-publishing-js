@@ -70,4 +70,7 @@ export class UrlConfigService {
     return UrlUtil.getContentUrl(this.getBaseUrl(), contentType, exportId);
   }
 
+  getPopoverLabelsPath(lang: string): string {
+    return `${UrlConfigService.I18N_ROOT_FOLDER}/${UrlConfigService.I18N_POPOVER_FOLDER}/${lang}.json`;
+  }
 }

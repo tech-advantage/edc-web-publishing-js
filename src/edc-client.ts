@@ -154,11 +154,10 @@ export class EdcClient {
    * @return {PromiseEs6<PopoverLabel>} a promise containing the popover labels
    */
   getPopoverLabels(languageCode?: string, exportId?: string): any {
-    const lang = this.languageService.isLanguagePresent(languageCode) ? languageCode : this.languageService.getCurrentLanguage();
     const pluginId = exportId || this.contentService.getCurrentPluginId();
     return this.getContent()
-      .then(() => this.getPopoverI18nUrl())
-      .then((url: string) => this.contentService.getPopoverLabel(lang, pluginId, url));
+      .then(() => this.urlConfigService)
+      .then((urlConfig: UrlConfigService) => this.contentService.getPopoverLabel(pluginId, urlConfig, languageCode));
   }
 
   /**

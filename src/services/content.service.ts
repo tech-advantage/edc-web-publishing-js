@@ -9,7 +9,8 @@ import { DocumentationTransfer } from '../entities/documentation-transfer';
 import { InformationMap } from '../entities/information-map';
 import { Toc } from '../entities/toc';
 import { Documentation } from '../entities/documentation';
-import {PopoverLabel} from '../entities/popover-label';
+import { PopoverLabel } from '../entities/popover-label';
+import { UrlConfigService } from './url-config.service';
 
 /**
  * The main service handling the contents for all the exports (aka plugins)
@@ -131,7 +132,10 @@ export class ContentService {
     return this.contentReady.then(() => this.documentationService.getInformationMapFromDocId(id));
   }
 
-  getPopoverLabel(langCode: string, sourceExportId: string, url: string): PromiseEs6<PopoverLabel> {
-    return this.contentReady.then(() => this.contextService.getPopoverLabel(langCode, sourceExportId, url));
+  getPopoverLabel(pluginId: string, url: UrlConfigService, lang?: string): PromiseEs6<PopoverLabel> {
+    return this.getContentReady()
+      .then(() => this.infoService.setCurrentExportId(pluginId, lang))
+      .then(() => this.contextService.initContext(pluginId))
+      .then(() => this.contextService.getPopoverLabel(this.translationService.getCurrentLanguage(), this.infoService.getCurrentExportId(), url));
   }
 }
