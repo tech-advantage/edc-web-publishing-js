@@ -97,6 +97,12 @@ Returns a promise containing the information map of the given documentation.
 
 See [InformationMap](https://github.com/tech-advantage/edc-client-js/blob/master/src/entities/information-map.ts).
 
+* **getPopoverLabels(): Promise\<PopoverLabel\>**
+
+Returns a promise containing the translated labels of the given documentation, in the given language.
+
+See [PopoverLabel](https://github.com/tech-advantage/edc-client-js/blob/master/src/entities/popover-label.ts).
+
 ### Translations
 
 edc supports multi language documentations, and a translation language can be specified when requesting a content from the help client.
