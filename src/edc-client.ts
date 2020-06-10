@@ -149,15 +149,14 @@ export class EdcClient {
   /**
    * Returns the translated popover labels
    * if pluginId is not defined, it will try and find the content in the current plugin Id export
-   * @param {string} exportId the main key of the requested contextual help element
-   * @param {string} languageCode the secondary key of the requested contextual help element
+   * @param {string} pluginId the pluginId defining the export the contextual help element belongs to
+   * @param {string} lang the identifier of the used lang
    * @return {PromiseEs6<PopoverLabel>} a promise containing the popover labels
    */
-  getPopoverLabels(languageCode?: string, exportId?: string): any {
-    const pluginId = exportId || this.contentService.getCurrentPluginId();
+  getPopoverLabels(lang?: string, pluginId?: string): any {
+    const pId = pluginId || this.contentService.getCurrentPluginId();
     return this.getContent()
-      .then(() => this.urlConfigService)
-      .then((urlConfig: UrlConfigService) => this.contentService.getPopoverLabel(pluginId, urlConfig, languageCode));
+      .then(() => this.contentService.getPopoverLabel(pId, this.urlConfigService, lang));
   }
 
   /**
