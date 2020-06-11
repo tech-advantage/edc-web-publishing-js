@@ -83,15 +83,15 @@ export class ContextService {
       labels.url = url.getPopoverLabelsPath(langCode);
       return this.httpClient.getItemContent<PopoverLabel>(labels)
         .then(label => {
-          if (!label){
-            return PromiseEs6.reject("Can't fetch popover labels !");
+          if (!label) {
+            return PromiseEs6.reject('Can\'t fetch popover labels !');
           }
           const tmpLabel = Utils.safeGet<any, {}>(label.content, ['labels']);
           if (tmpLabel) {
             label.articles = Utils.safeGet<any, string>(tmpLabel, ['articles']);
             label.links = Utils.safeGet<any, string>(tmpLabel, ['links']);
-          }else{
-            return PromiseEs6.reject("Can't find required data in fetched popover labels !");
+          } else {
+            return PromiseEs6.reject('Can\'t find required data in fetched popover labels !');
           }
           return label;
         });
