@@ -74,14 +74,24 @@ export class ContextService {
 
   getPopoverLabel(langCode: string, pluginId: string, url: UrlConfigService): PromiseEs6<PopoverLabel> {
     return this.initContext(pluginId).then(() => {
+      // To make sure that context is initialized and usable
+      if (!this.context || !this.context.contextualHelp) {
+        return null;
+      }
+
       const labels: PopoverLabel = new PopoverLabel();
       labels.url = url.getPopoverLabelsPath(langCode);
       return this.httpClient.getItemContent<PopoverLabel>(labels)
         .then(label => {
+          if (!label) {
+            return PromiseEs6.reject('Can\'t fetch popover labels !');
+          }
           const tmpLabel = Utils.safeGet<any, {}>(label.content, ['labels']);
           if (tmpLabel) {
             label.articles = Utils.safeGet<any, string>(tmpLabel, ['articles']);
             label.links = Utils.safeGet<any, string>(tmpLabel, ['links']);
+          } else {
+            return PromiseEs6.reject('Can\'t find required data in fetched popover labels !');
           }
           return label;
         });
