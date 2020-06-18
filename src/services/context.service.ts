@@ -87,6 +87,7 @@ export class ContextService {
           if (!label) {
             return PromiseEs6.reject('Can\'t fetch popover labels !');
           }
+
           const tmpLabel = Utils.safeGet<any, {}>(label.content, ['labels']);
           const tmpError = Utils.safeGet<any, {}>(label.content, ['errors']);
           if (tmpLabel && tmpError) {
@@ -99,10 +100,11 @@ export class ContextService {
             errorLabels.failedData = Utils.safeGet<any, string>(tmpError, ['failedData']);
 
             label.errors = errorLabels;
-          } else {
-            return PromiseEs6.reject('Can\'t find required data in fetched popover labels !');
+
+            return label;
           }
-          return label;
+
+          return PromiseEs6.reject('Can\'t find required data in fetched popover labels !');
         });
     });
   }
