@@ -16,3 +16,4 @@ export { InformationMap } from './src/entities/information-map';
 export { Helper } from './src/entities/helper';
 export { DocumentationTransfer } from './src/entities/documentation-transfer';
 export { PopoverLabel } from './src/entities/popover-label'
+export { PopoverError } from './src/entities/popover-error'
