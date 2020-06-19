@@ -1,4 +1,5 @@
 import { Loadable } from './loadable';
+import { PopoverError } from './popover-error';
 
 export class PopoverLabel implements Loadable {
   exportId: string;
@@ -6,4 +7,7 @@ export class PopoverLabel implements Loadable {
   content?: string;
   articles?: string;
   links?: string;
+  iconAlt?: string;
+  comingSoon?: string;
+  errors: PopoverError;
 }

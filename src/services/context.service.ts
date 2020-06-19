@@ -8,6 +8,7 @@ import { ContextualExport } from '../entities/ContextualExport';
 import { Article } from '../entities/article';
 import { PopoverLabel } from '../entities/popover-label';
 import { UrlConfigService } from './url-config.service';
+import { PopoverError } from '../entities/popover-error';
 
 /**
  * For reading and returning the documentation context content
@@ -86,14 +87,24 @@ export class ContextService {
           if (!label) {
             return PromiseEs6.reject('Can\'t fetch popover labels !');
           }
+
           const tmpLabel = Utils.safeGet<any, {}>(label.content, ['labels']);
-          if (tmpLabel) {
+          const tmpError = Utils.safeGet<any, {}>(label.content, ['errors']);
+          if (tmpLabel && tmpError) {
             label.articles = Utils.safeGet<any, string>(tmpLabel, ['articles']);
             label.links = Utils.safeGet<any, string>(tmpLabel, ['links']);
-          } else {
-            return PromiseEs6.reject('Can\'t find required data in fetched popover labels !');
+            label.iconAlt = Utils.safeGet<any, string>(tmpLabel, ['iconAlt']);
+            label.comingSoon = Utils.safeGet<any, string>(tmpLabel, ['comingSoon']);
+
+            const errorLabels = new PopoverError();
+            errorLabels.failedData = Utils.safeGet<any, string>(tmpError, ['failedData']);
+
+            label.errors = errorLabels;
+
+            return label;
           }
-          return label;
+
+          return PromiseEs6.reject('Can\'t find required data in fetched popover labels !');
         });
     });
   }
