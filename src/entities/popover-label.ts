@@ -9,5 +9,6 @@ export class PopoverLabel implements Loadable {
   links?: string;
   iconAlt?: string;
   comingSoon?: string;
+  errorTitle?: string;
   errors: PopoverError;
 }
