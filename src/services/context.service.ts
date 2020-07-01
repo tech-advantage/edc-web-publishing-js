@@ -95,6 +95,7 @@ export class ContextService {
             label.links = Utils.safeGet<any, string>(tmpLabel, ['links']);
             label.iconAlt = Utils.safeGet<any, string>(tmpLabel, ['iconAlt']);
             label.comingSoon = Utils.safeGet<any, string>(tmpLabel, ['comingSoon']);
+            label.errorTitle = Utils.safeGet<any, string>(tmpLabel, ['errorTitle']);
 
             const errorLabels = new PopoverError();
             errorLabels.failedData = Utils.safeGet<any, string>(tmpError, ['failedData']);
