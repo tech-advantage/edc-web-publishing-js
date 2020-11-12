@@ -1,4 +1,7 @@
 # edc-client-js
+
+[![npm version](https://badge.fury.io/js/edc-client-js.svg)](https://badge.fury.io/js/edc-client-js)
+
 _This project is meant to be used with **easy doc contents** (aka edc)._
 
 edc is a simple yet powerful tool for agile-like documentation
